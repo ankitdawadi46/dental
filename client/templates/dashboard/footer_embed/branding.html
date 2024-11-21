@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,300;0,500;1,400&display=swap"
+        rel="stylesheet">
+    <title>Snowberry</title>
+
+    <style>
+        body {
+            margin: 0px;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .footer {
+            background-color: #05329e;
+
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+
+        }
+
+        .wrapper {
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .copyright {
+
+            display: flex;
+            align-items: center;
+        }
+
+        .copyright h4 {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            margin: 10px 0px;
+        }
+
+        .powered img {
+            height: 35px;
+            margin: 12px 0px;
+        }
+
+        .powered {
+            display: flex;
+        }
+
+        .powered p {
+            color: #fff;
+            font-size: 17px;
+            width: 90px;
+        }
+
+        .divider {
+            border-left: 2px solid white;
+            height: 30px;
+            margin: 15px 10px;
+        }
+
+        .wrapper {
+            height: inherit;
+        }
+
+
+        @media(max-width:690.98px) {
+            .footer-content {
+                flex-direction: column-reverse;
+                gap: 5px;
+            }
+
+            .copyright {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .copyright h4 {
+                margin-top: 0;
+                margin-bottom: 15px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .powered {
+                width: 100%;
+                margin: 0 auto;
+                justify-content: center;
+                text-align: center;
+
+            }
+        }
+
+
+
+        @media(max-width:400px) {
+            .footer-content {
+                gap: 0px;
+            }
+
+            .powered img {
+                height: 25px;
+                margin: 16px 0px;
+            }
+
+            .divider {
+                height: 20px;
+            }
+
+            .copyright h4 {
+                font-size: 12px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <section class="footer">
+        <div class="wrapper">
+            <div class="footer-content">
+                <div class="copyright">
+                    <h4>Copyright © 2023 | All rights reserved.</h4>
+                </div>
+                <div class="powered">
+                    <p>Powered by</p>
+                    <a href="https://snowberrycms.com" target="_blank" rel="noopener noreferrer">
+                        <img src="https://snowberry.prixacdn.net/media/gallery_folder/0UbuTDQ_pb59ZzXRPx_mzbacezlbwgseupfk9gr4yllzot3mwcr69ygb0cysm1jjf7f5cofsqa1l2gh.png">
+                    </a>
+                    <div class="divider">
+
+                    </div>
+                    <a href="https://snowberrycms.com" target="_blank" rel="noopener noreferrer">
+                        <img src="https://snowberry.prixacdn.net/media/gallery_folder/JD8gYhi_nmpRaiqmwk_tb2ydzoizmhcmtgayjzcx2xwtlfhod0zngekisaa5sk7b94h5vsc1g03erl6.png">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+</body>
+
+</html>

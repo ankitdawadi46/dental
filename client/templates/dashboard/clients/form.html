@@ -1,0 +1,273 @@
+{% extends "dashboard/base/index.html" %}
+
+{% load static %}
+
+{% block title %}Clients {% endblock %}
+
+{% block style %}
+<style>
+    body {
+    background: #0AE;
+    text-align: center;
+    line-height: 100vh;
+    }
+
+    .group {
+    position: relative;
+    display: inline-block;
+    line-height: 16px;
+    }
+
+    .bigSqr {
+    position: relative;
+    display: inline-block;
+    left:37%;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    transform-origin: bottom left;
+    -webkit-animation: bigSqrShrink 1s linear infinite;
+            animation: bigSqrShrink 1s linear infinite;
+    }
+
+    .square {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #123088;
+    }
+
+    .first {
+    left: 0px;
+    top: 20px;
+    }
+
+    .second {
+    left: 20px;
+    top: 20px;
+    -webkit-animation: drop2 1s linear infinite;
+            animation: drop2 1s linear infinite;
+    }
+
+    .third {
+    left: 0px;
+    top: 0px;
+    -webkit-animation: drop3 1s linear infinite;
+            animation: drop3 1s linear infinite;
+    }
+
+    .fourth {
+    left: 20px;
+    top: 0px;
+    -webkit-animation: drop4 1s linear infinite;
+            animation: drop4 1s linear infinite;
+    }
+
+    .text {
+    line-height: 16px;
+    font-family: "Open Sans", "Roboto", Arial, sans-serif;
+    font-weight: 400;
+    color: #123088;
+    display: block;
+    margin: 10px auto;
+    padding: 3px;
+    }
+
+    @-webkit-keyframes bigSqrShrink {
+    0% {
+        transform: scale(1);
+    }
+    90% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.5);
+    }
+    }
+
+    @keyframes bigSqrShrink {
+    0% {
+        transform: scale(1);
+    }
+    90% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.5);
+    }
+    }
+    @-webkit-keyframes drop2 {
+    0% {
+        transform: translateY(-50px);
+    }
+    25% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop2 {
+    0% {
+        transform: translateY(-50px);
+    }
+    25% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @-webkit-keyframes drop3 {
+    0% {
+        transform: translateY(-50px);
+    }
+    50% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop3 {
+    0% {
+        transform: translateY(-50px);
+    }
+    50% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @-webkit-keyframes drop4 {
+    0% {
+        transform: translateY(-50px);
+    }
+    75% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop4 {
+    0% {
+        transform: translateY(-50px);
+    }
+    75% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+</style>
+<style>
+    .loader-wrapper{
+        display:none;
+        position:fixed;
+        top:0;
+        bottom:0;
+        right:0;
+        left:0;
+        background:#fff;
+    }
+    .group{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+    }
+
+</style>
+{% endblock%}
+
+{% block content %}
+<div class="container-fluid page__container">
+    <div class="card card-form form-header-layout" style="position:relative;">
+        <h1 style="padding: 27px !important;">Clients </h1>
+        <div class="row no-gutters" style="border-top: 1px solid #EFEFEF">
+            <div class="col-lg-12 card-form__body card-body pomelo-form-card" style="background:none !important;">
+                <form method="post"{% if not object %} action="{% url 'dashboard:clients-create' %}" id="client-form-id" {% endif %} enctype="multipart/form-data" autocomplete="off">
+                    
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="form-group" >
+                        <label>{{ field.label }}{% if field.field.required %}* {% endif %}</label>
+                        {{ field }}
+                        <span style="color:red;">{{ field.errors|striptags|safe }}</span>
+                    </div>
+                    {% endfor %}    
+
+                    <button type="submit" class="btn btn-primary btn-submit"><i class="fa fa-check"></i> Submit</button>
+                </form>
+                <div class=""></div>
+            </div>
+        </div>
+
+        <div class="loader-wrapper">
+            <div class="group"> 
+                <div class="bigSqr">
+                    <div class="square first"></div>
+                    <div class="square second"></div>
+                    <div class="square third"></div>
+                    <div class="square fourth"></div>
+                </div>
+                <div class="text">Preparing your website</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    {% block script %}
+    <script>
+        $('#id_contact_number').attr("type", "number");
+
+    $(function(){
+       $('#id_schema_name').keyup(function(e){
+           var nowval = $(this).val();
+           nowval=nowval.replace(/\s+/g, '-');
+           $(this).val(nowval);
+           if (nowval==''){
+               var newval = '';
+           }
+           else
+           {
+
+               {% if is_staging %}
+               var newval = nowval.toLowerCase() + '.sunflowerspectrum.com';
+               {% else %}
+                var newval = nowval.toLowerCase() + '.sunflowerspectrum.com';
+               {% endif %}
+
+           }
+           $('#id_primary_domain_name').val(newval);
+       }) ;
+    });
+    </script>
+    <script>
+        var page_loader = $('.loader-wrapper')
+        $('button[type="submit"]').on('click', function(){
+            var is_clean = true // if is_clean then form is ready to submit and can load loader
+            var that = $(this)
+            var form = $("form#client-form-id input").length // get legth of form fields
+            for (let i=0; i<form; i++){
+                if(!($("form#client-form-id input")).get(i).reportValidity()){
+                    // reportValidity() check the validity of specific field of form
+                    // if field contains html navigator error then form is not ready to submit so set the is_clean value to false
+                    is_clean = false
+                }
+            }
+            // if the value of is_clean is true we can load loader 
+            if (is_clean){
+                page_loader.show()
+            }
+
+        })
+    </script>
+    {% endblock %}
+{% endblock %}
+

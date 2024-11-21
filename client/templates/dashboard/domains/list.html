@@ -1,0 +1,68 @@
+{% extends "dashboard/base/index.html" %}
+
+{% load static %}
+
+{% block title %}Domains for {{ client.name }}{% endblock %}
+
+{% block subtitle %}Domains for {{ client.name }}{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid page__container">
+    <div class="card document-card">
+        <div class="row mb-4 mt-4 mr-2">
+            <div class="col-md-12">
+                <div style="text-align: right">
+                    <a href="{% url 'dashboard:domains-create' client.id%}" class="btn btn-outline-primary">
+                        <i class="fa fa-plus"></i>&nbsp; Add Domain
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row ml-2 mr-2 mb-2 mt-2">
+            <div class="col-sm-12 document-table-space">
+                <table class="table w-full no-footer" role="grid">
+                    <thead class="table-space-top-bottom">
+                        <tr role="row">
+                            <th>S.N</th>
+                            <th>Domain Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for domain in object_list %}
+                        <tr>
+                            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                            <td>{% if domain.is_display_domain %}<span style="color:steelblue"><i class="fa fa-check-circle"></i> </span>{% endif %}{{ domain }}</td>
+                            <td>
+                                <div class="btn-group" role="group" style="margin:auto;">
+                                    <a href="{% url 'dashboard:domains-update' domain.id %}" class="btn-sm btn btn-info btn-success-space" data-toggle="tooltip" data-original-title='Modify'>
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </a>
+
+                                    <a href="{% url 'dashboard:domains-create-cloudflare-record' domain.id %}" class="btn-sm btn btn-info btn-success-space" data-toggle="tooltip" data-original-title='Create DNS Zone'>
+                                        <i class="fa fa-cloud"></i>
+                                    </a>
+
+                                    {% if domain.has_cf_configured %}
+                                        <a href="{% url 'dashboard:domains-create-dns-cf-record' domain.id %}" class="btn-sm btn btn-danger btn-success-space" data-toggle="tooltip" data-original-title='Create DNS Records for Zone'>
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+                {% include 'dashboard/base/pagination.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

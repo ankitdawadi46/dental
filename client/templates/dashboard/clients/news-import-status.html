@@ -1,0 +1,91 @@
+{% extends "dashboard/base/index.html" %}
+
+{% load static %}
+
+{% block title %}Clients{% endblock %}
+
+{% block subtitle %}Clients{% endblock %}
+
+{% block style %}
+{% endblock %}
+{% block content %}
+<h1>status</h1>
+<h3 id="tenant"></h3>
+<div id="dashboard">
+    <p id="progress_status"></p>
+    <p id="author"></p>
+    <p id="category"></p>
+
+    <p id="news_import"></p>
+    <p id="total_news"></p>
+    <p id="remaining_import"></p>
+    <p id="is_complete"></p>
+
+    <div id="error_data"></div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Function to update the dashboard
+        var loop_completed = false
+        function updateDashboard() {
+            var is_complete = false;
+            $.ajax({
+                url: '{% url "dashboard:news_import_status" %}',
+                type: 'GET',
+                success: function (response) {
+                    // Update the dashboard elements with the received data
+                    if (!response.error_stat) {
+                        $('#progress_status').text('Progress Status: InProgress');
+                    } else if (response.error_stat) {
+                        $('#progress_status').text('Progress Status: Completed');
+                    } else {
+                        $('#progress_status').text('Progress Status: Error Occurred');
+                    }
+
+
+
+
+
+                    $('#author').text('Author Import: ' + (response.author_import));
+                    $('#tenant').text('Client: ' + (response.clients));
+                    $('#category').text('Category Import: ' + (response.category_import));
+                    $('#news_import').text('News Import: ' + (response.news_import));
+                    $('#total_news').text('Total News: ' + (response.total_news));
+                    $('#remaining_import').text('Remaining Import: ' + (response.remaining_import));
+                    $('#is_complete').text('Is Complete: ' + (response.is_complete));
+
+                    is_complete = response.is_complete;
+                    loop_completed = response.loop_completed;
+
+                    if (response.error_data) {
+                        var errorDataHTML = '<h3>Error Data:</h3>';
+                        for (var i = 0; i < response.error_data.length; i++) {
+                            errorDataHTML += '<p>' + response.error_data[i] + '</p>';
+                        }
+                        $('#error_data').html(errorDataHTML);
+                    }
+
+
+                        
+                    },
+
+
+                error: function (xhr, status, error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
+
+        // Initial update on page load
+        updateDashboard();
+
+        // Repeat the update every 5 minutes
+        // if (!loop_completed) {
+        //     updateDashboard()
+        //     setInterval(updateDashboard, 60 * 1000);
+        // }
+
+    });
+</script>
+{% endblock %}

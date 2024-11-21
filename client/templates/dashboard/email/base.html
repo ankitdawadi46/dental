@@ -1,0 +1,173 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,300;0,500;1,400&display=swap" rel="stylesheet">
+    <title>RXPIN</title>
+   
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            font-size: 17px;
+            overflow-x: hidden;
+            letter-spacing: 0.5px;
+            margin: 0;
+            line-height: 1.5;
+            background-color: #f2f2f2;
+        }
+
+        img {
+            width: 100%;
+            object-fit: cover;
+            height: 100%;
+            vertical-align: middle;
+            border-style: none;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 0px;
+        }
+        
+        @media (max-width: 799.98px) {
+            .section {
+                width: 100% !important;
+            }  
+        }
+        @media(max-width: 767.98px){
+            .get-started{
+                width: 90% !important;
+            }
+        }
+        @media(max-width:575.98px){
+            .org-width:not(:last-child){
+                margin-bottom: 30px !important;
+            }
+        }
+
+    </style>
+    <style>
+         @media(max-width:575.98px){
+            .social-media-image{
+            width: 30px;
+            height: 30px;
+            
+            }
+            .main-section-text h1{
+                font-size: 50px;
+            }
+            .main-section-text h2{
+                font-size: 22px;
+                margin-top: 0px;
+                color: #222;
+                padding: 20px 0px;
+            }
+            .main-section-text h6{
+                font-size: 14px;
+                padding: 0px 20px;
+            }
+            
+            .main-section-content h5{
+                font-size: 14px !important;
+            }
+            .main-section-content p{
+                font-size: 10px !important;
+            }
+            .logo-section img {
+                width: 120px !important;
+            }
+            
+            .primary-section span{
+                font-size: 16px !important;
+            }
+            .primary-section{
+                margin: 30px !important;
+            }
+            .started h4{
+                margin: 5px !important;
+            }
+            .get-started{
+                display: unset !important;
+            }
+            .divider{
+                border-top: 2px solid gray;
+                width: 70%;
+                margin: 0 auto !important;
+                height: unset !important;
+                border-left: unset !important;
+            }
+            .login , .publish{
+                width: auto;
+            }
+            .org-info{
+                display: block !important;
+            }
+            .org-width{
+                width: 100% !important;
+                margin-bottom: 30px !important;
+            }
+       }
+       @media(max-width:320px){
+            .main-section-text-link a{
+                font-size: 10px !important;
+            }
+       }
+    </style>
+</head>
+
+<body>
+    <div class="section fixed-width" style=" margin: auto; background-color: #fff; width: 800px;">
+        <div class="logo-section" style="background-color: #05329e; padding: 20px;">
+            <img src="https://pathways.rxpin.com/static/dashboard/admin/assets/images/rxpin-logo.png" style="width: 180px; object-fit: contain; margin: 0 auto; display: block;">
+        </div>
+        <div style="padding: 0 15px;">
+            {% block content %}
+            {% endblock %}
+
+        </div>
+        <br>
+        <div class="org-info" style=" background-color: #05329e !important; display: flex;  padding: 30px;  flex-wrap: wrap;">
+            <div class="org-info-address org-width" style="width: 33.33%; margin: 0 auto;">
+                <img src="https://i.imgur.com/lAHQLTM.png" style="height: 32px; width: 32px; object-fit: contain; margin: 0 auto; display: block;">
+                <h6 style="color: #fff; font-size: 17px; font-weight: 400; margin: 5px; text-align: center;">Jawalakhel, Lalitpur, Nepal</h6>
+            </div>
+            <div class="org-info-phone org-width" style="width: 33.33%; margin: 0 auto;">
+                <img src="https://i.imgur.com/MBLSmRk.png" style="height: 32px; width: 32px; object-fit: contain; margin: 0 auto; display: block;">
+                <h6 style=" text-align: center; margin: 5px;">
+                    <a href="#" style="color: #fff; font-size: 17px; font-weight: 400;  text-decoration: none;">
+                        +977 9801970966
+                    </a>
+                </h6>
+            </div>
+            <div class="org-info-mail org-width" style="width: 33.33%; margin: 0 auto;">
+                <img src="https://i.imgur.com/5LjlAOG.png" style="height: 32px; width: 32px; object-fit: contain; margin: 0 auto; display: block;">
+                <h6 style=" text-align: center; margin: 5px;">
+                    <a href="#" style="color: #fff; font-size: 17px; font-weight: 400;  text-decoration: none;">
+                        support@prixa.net
+                    </a>
+                </h6>
+            </div>
+        </div>
+        <div class="social-link" style="background-color:#fff; padding-bottom: 15px;">
+            <p style="color: #05329e; font-size: 17px; text-align: center; padding-top: 30px; padding-bottom: 15px;" >Follow us on:</p>
+            <div class="social-link-icon" style="text-align: center;">
+                <a href="https://www.facebook.com/snowberrycms/"><img src="https://i.imgur.com/CJdSzrG.png" style=" height: 20px; width: 20px; object-fit: contain; margin: 0px 5px;"></a>
+                <a href="https://www.instagram.com/snowberrycms/"><img src="https://i.imgur.com/P4BJBc7.png" style=" height: 20px; width: 20px; object-fit: contain; margin: 0px 5px;"></a>
+                <a href="https://twitter.com/snowberrycms/"><img src="https://i.imgur.com/5Mci5fC.png" style=" height: 20px; width: 20px; object-fit: contain; margin: 0px 5px;"></a>
+                <a href="https://www.tiktok.com/@snowberrycms/"><img src="https://i.imgur.com/lbAJ9eZ.png" style=" height: 20px; width: 20px; object-fit: contain; margin: 0px 5px;"></a>
+            </div>
+        </div> 
+    </div>
+    
+    
+</body>
+
+</html>

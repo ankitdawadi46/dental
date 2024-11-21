@@ -1,0 +1,269 @@
+{% extends "dashboard/base/index.html" %}
+
+{% load static %}
+
+{% block title %}Invoices{% endblock %}
+
+{% block subtitle %}Invoices{% endblock %}
+
+{% block style %}
+<style>
+    body {
+    background: #0AE;
+    text-align: center;
+    line-height: 100vh;
+    }
+
+    .group {
+    position: relative;
+    display: inline-block;
+    line-height: 16px;
+    }
+
+    .bigSqr {
+    position: relative;
+    display: inline-block;
+    left:37%;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    transform-origin: bottom left;
+    -webkit-animation: bigSqrShrink 1s linear infinite;
+            animation: bigSqrShrink 1s linear infinite;
+    }
+
+    .square {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #123088;
+    }
+
+    .first {
+    left: 0px;
+    top: 20px;
+    }
+
+    .second {
+    left: 20px;
+    top: 20px;
+    -webkit-animation: drop2 1s linear infinite;
+            animation: drop2 1s linear infinite;
+    }
+
+    .third {
+    left: 0px;
+    top: 0px;
+    -webkit-animation: drop3 1s linear infinite;
+            animation: drop3 1s linear infinite;
+    }
+
+    .fourth {
+    left: 20px;
+    top: 0px;
+    -webkit-animation: drop4 1s linear infinite;
+            animation: drop4 1s linear infinite;
+    }
+
+    .text {
+    line-height: 16px;
+    font-family: "Open Sans", "Roboto", Arial, sans-serif;
+    font-weight: 400;
+    color: #123088;
+    display: block;
+    margin: 10px auto;
+    padding: 3px;
+    }
+
+    .select-btns {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .select-btns > button {
+        margin-left: 10px;
+    }
+
+    .modal-footer {
+        margin-top: 10px;
+    }
+
+    @-webkit-keyframes bigSqrShrink {
+    0% {
+        transform: scale(1);
+    }
+    90% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.5);
+    }
+    }
+
+    @keyframes bigSqrShrink {
+    0% {
+        transform: scale(1);
+    }
+    90% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.5);
+    }
+    }
+    @-webkit-keyframes drop2 {
+    0% {
+        transform: translateY(-50px);
+    }
+    25% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop2 {
+    0% {
+        transform: translateY(-50px);
+    }
+    25% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @-webkit-keyframes drop3 {
+    0% {
+        transform: translateY(-50px);
+    }
+    50% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop3 {
+    0% {
+        transform: translateY(-50px);
+    }
+    50% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @-webkit-keyframes drop4 {
+    0% {
+        transform: translateY(-50px);
+    }
+    75% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop4 {
+    0% {
+        transform: translateY(-50px);
+    }
+    75% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+</style>
+<style>
+    .loader-wrapper{
+        display:none;
+        position:fixed;
+        top:0;
+        bottom:0;
+        right:0;
+        left:0;
+        background:#fff;
+    }
+    .group{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+    }
+
+    .form-check:nth-child(n) {
+        margin-top: 7px;
+    }
+
+</style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/brands.min.css" integrity="sha512-OivR4OdSsE1onDm/i3J3Hpsm5GmOVvr9r49K3jJ0dnsxVzZgaOJ5MfxEAxCyGrzWozL9uJGKz6un3A7L+redIQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block content %}
+
+
+
+<div class="container-fluid page__container">
+    <div class="row mb-4 mt-4 mr-2">
+        <div class="col-md-12">
+            <div style="text-align: right">
+                <a href="{% url 'dashboard:invoices-create' %}" class="btn btn-outline-primary">
+                    <i class="fa fa-plus"></i>&nbsp; Add Invoice
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card document-card">
+        <div class="row ml-2 mr-2 mb-2 mt-2">
+            <div class="col-sm-12 document-table-space">
+                <table class="table w-full no-footer" role="grid">
+                    <thead class="table-space-top-bottom">
+                        <tr role="row">
+                            <th>S.N</th>
+                            <th>Client</th>
+                            <th>Paid Fee</th>
+                            <th>Next Due Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in object_list %}
+                        <tr>
+                            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                            <td>{{ invoice.client }}</td>
+                            <td>
+                                {{invoice.paid_fee}}
+                            </td>
+                            <td>{{ invoice.next_payment_due_date }}</td>
+                            <td>
+                                <div class="btn-group" role="group" style="margin:auto;">
+                                    <a href="{% url 'dashboard:invoices-update' invoice.id %}" class="btn-sm btn btn-info btn-success-space" data-toggle="tooltip" data-original-title='Modify'>
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </a>
+                                    <a href="{% url 'dashboard:invoices-delete' invoice.id %}" class="btn-sm btn btn-danger btn-danger-space" data-toggle="tooltip" data-original-title='Delete'>
+                                        <i class="fa fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+                {% include 'dashboard/base/pagination.html' %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}
+

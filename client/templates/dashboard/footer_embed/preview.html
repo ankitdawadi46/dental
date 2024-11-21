@@ -1,0 +1,163 @@
+{% extends 'dashboard/base/index.html' %}
+
+{% block style %}
+<style>
+    .embed-section {
+        margin-top:10px;
+        display:flex,
+    }
+    .embed-section .embed-btn {
+        margin-left:auto;
+        margin-right:10px;
+    }
+
+    .embed-btn {
+     background: initial;
+     border: 1px solid #5BB1FF;
+     border-radius: 6px;
+     box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+     box-sizing: border-box;
+     color: #5BB1FF;
+     cursor: pointer;
+     display: inline-block;
+     font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif;
+     font-size: 13px !important ;
+     font-weight: 800;
+     line-height: 16px;
+     outline: 0;
+     padding: 12px 14px;
+     text-align: center;
+     text-rendering: geometricprecision;
+     text-transform: none;
+     user-select: none;
+     -webkit-user-select: none;
+     touch-action: manipulation;
+     vertical-align: middle;
+   }
+   
+   .embed-btn:hover,
+   .embed-btn:active {
+     background-color: #5BB1FF;
+     background-position: 0 0;
+     color: white;
+   }
+   
+   .embed-btn:active {
+     opacity: .5;
+   }
+   .embed-section{
+       padding: 40px 60px 40px 30px;
+       box-shadow: 0 0 4px rgba(0,0,0,.2);
+       position:relative;
+   }
+   .embed-btn{
+        display:inline-block;
+        padding: 4px 10px;
+        position:absolute;
+       top: 15px;
+       right: 15px;
+
+   }
+   .embed-content-wrapper{
+       padding: 30px;
+       border: 1px solid #123088;
+       border-radius: 4px;
+       margin-bottom: 30px;
+   }
+   .embed-content{
+       margin-bottom: 30px;
+   }
+   .embed-content-title{
+       text-align: center;
+   }
+   .embed-content-title h4{
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: #123088;
+   }
+   .embed-content-title h5{
+       font-size: 16px;
+   }
+
+   .tooltip-copy {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    color: #092770;
+    border: 1px solid #092770;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    right: 12px;
+    top: -15px;
+    border-radius: 2px;
+    display: none;
+}
+
+.tooltip-copy::after{
+    content: '';
+    width: 6px;
+    height: 6px;
+    background-color: #092770;
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    -webkit-clip-path: polygon(0 0, 50% 100%, 100% 0);
+    clip-path: polygon(0 0, 50% 100%, 100% 0);
+}
+   
+</style>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="container-fluid page__container">
+            <div class="embed-content-wrapper">
+                <div class="embed-content">
+                    <div class="embed-content-title">
+                        <h4> Embed in Website footer </h4>
+                    </div>
+                    <div class="embed-content-title">
+                        <h5>Prixa-Snowberry branding footer for prixa product.</h5>
+                    </div>
+                </div>
+                <section class="embed-section">
+                    <div class="embed-code-link-content" id="embed-text">
+                        &lt;iframe style="width: 100%; height:60px; display:block; border:none;" frameborder="0" src="{% url 'dashboard:footer-embed-code' %}" scrolling="no"&gt;&lt;/iframe/&gt;
+                    </div>
+                    <div class="tooltip-copy">
+                        Copied
+                    </div>
+                    <button class="embed-btn" id="copy-imbed-code">Copy</button>
+                </section> 
+            </div>   
+            <iframe style="width: 100%;" frameborder="0" src="{% url 'dashboard:footer-embed-code' %}" scrolling="no"></iframe>
+        </div>
+    </div>
+   
+     
+   
+{% endblock %}
+
+{% block script %}
+<script>
+    function copyToClipboard(element) {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val($(element).text()).select();
+    document.execCommand("copy");
+    $temp.remove();
+    $(".tooltip-copy").fadeIn().delay(1000).fadeOut();
+    }
+    $('body').on('click', '#copy-imbed-code', function(){
+        var text = document.getElementById('embed-text')
+        copyToClipboard("#embed-text")
+    })
+
+    {% comment %} $(document).ready(function(){
+        $('#copy-imbed-code').tooltip({'title': 'Copied!', trigger:'click'});
+        
+    }) {% endcomment %}
+
+</script>
+{% endblock %}

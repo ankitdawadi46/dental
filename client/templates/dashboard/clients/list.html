@@ -1,0 +1,612 @@
+{% extends "dashboard/base/index.html" %}
+
+{% load static %}
+
+{% block title %}Patient{% endblock %}
+
+{% block subtitle %}Patient{% endblock %}
+
+{% block style %}
+<style>
+	body {
+	background: #0AE;
+	text-align: center;
+	line-height: 100vh;
+	}
+
+	.group {
+	position: relative;
+	display: inline-block;
+	line-height: 16px;
+	}
+
+	.bigSqr {
+	position: relative;
+	display: inline-block;
+	left:37%;
+	width: 40px;
+	height: 40px;
+	overflow: hidden;
+	transform-origin: bottom left;
+	-webkit-animation: bigSqrShrink 1s linear infinite;
+			animation: bigSqrShrink 1s linear infinite;
+	}
+
+	.square {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	background: #123088;
+	}
+
+	.first {
+	left: 0px;
+	top: 20px;
+	}
+
+	.second {
+	left: 20px;
+	top: 20px;
+	-webkit-animation: drop2 1s linear infinite;
+			animation: drop2 1s linear infinite;
+	}
+
+	.third {
+	left: 0px;
+	top: 0px;
+	-webkit-animation: drop3 1s linear infinite;
+			animation: drop3 1s linear infinite;
+	}
+
+	.fourth {
+	left: 20px;
+	top: 0px;
+	-webkit-animation: drop4 1s linear infinite;
+			animation: drop4 1s linear infinite;
+	}
+
+	.text {
+	line-height: 16px;
+	font-family: "Open Sans", "Roboto", Arial, sans-serif;
+	font-weight: 400;
+	color: #123088;
+	display: block;
+	margin: 10px auto;
+	padding: 3px;
+	}
+
+	.select-btns {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		text-align: center;
+		justify-content: center;
+	}
+
+	.select-btns > button {
+		margin-left: 10px;
+	}
+
+	.modal-footer {
+		margin-top: 10px;
+	}
+
+	@-webkit-keyframes bigSqrShrink {
+	0% {
+		transform: scale(1);
+	}
+	90% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(0.5);
+	}
+	}
+
+	@keyframes bigSqrShrink {
+	0% {
+		transform: scale(1);
+	}
+	90% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(0.5);
+	}
+	}
+	@-webkit-keyframes drop2 {
+	0% {
+		transform: translateY(-50px);
+	}
+	25% {
+		transform: translate(0);
+	}
+	100% {
+		transform: translate(0);
+	}
+	}
+	@keyframes drop2 {
+	0% {
+		transform: translateY(-50px);
+	}
+	25% {
+		transform: translate(0);
+	}
+	100% {
+		transform: translate(0);
+	}
+	}
+	@-webkit-keyframes drop3 {
+	0% {
+		transform: translateY(-50px);
+	}
+	50% {
+		transform: translate(0);
+	}
+	100% {
+		transform: translate(0);
+	}
+	}
+	@keyframes drop3 {
+	0% {
+		transform: translateY(-50px);
+	}
+	50% {
+		transform: translate(0);
+	}
+	100% {
+		transform: translate(0);
+	}
+	}
+	@-webkit-keyframes drop4 {
+	0% {
+		transform: translateY(-50px);
+	}
+	75% {
+		transform: translate(0);
+	}
+	100% {
+		transform: translate(0);
+	}
+	}
+	@keyframes drop4 {
+	0% {
+		transform: translateY(-50px);
+	}
+	75% {
+		transform: translate(0);
+	}
+	100% {
+		transform: translate(0);
+	}
+	}
+</style>
+<style>
+	.loader-wrapper{
+		display:none;
+		position:fixed;
+		top:0;
+		bottom:0;
+		right:0;
+		left:0;
+		background:#fff;
+	}
+	.group{
+		position:absolute;
+		top:50%;
+		left:50%;
+		transform:translate(-50%,-50%);
+	}
+
+	.form-check:nth-child(n) {
+		margin-top: 7px;
+	}
+
+</style>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/brands.min.css" integrity="sha512-OivR4OdSsE1onDm/i3J3Hpsm5GmOVvr9r49K3jJ0dnsxVzZgaOJ5MfxEAxCyGrzWozL9uJGKz6un3A7L+redIQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+{% block modal %}
+<div class="modal" id="pf2Modal" tabindex="-1" role="dialog" aria-labelledby="pf2Modal" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+	  <div class="modal-content">
+
+		  <div class="modal-header">
+		  <h5 class="modal-title" id="modalLongTitle">Migrate from Wordpress</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+
+	<div class="modal-body pfbody">
+
+	</div>
+	  </div>
+	</div>
+</div>
+{% endblock modal %}
+{% block content %}
+<!-- Remove dump Modal -->
+<!-- Modal -->
+
+
+
+<div class="modal fade" id="remove-dump-modal" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title" id="modalLongTitle">Remove dump data</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">
+		  <h5>Select the items which you want to delete.</h5>
+		  <div class="form-check">
+			<input class="form-check-input delete-input-check" type="checkbox" value="category">
+			<label class="form-check-label" for="flexCheckDefault">
+				Category
+			</label>
+		  </div>
+		  <div class="form-check">
+			<input class="form-check-input delete-input-check" type="checkbox" value="author">
+			<label class="form-check-label" for="flexCheckDefault">
+				Author
+			</label>
+		  </div>
+		  <div class="form-check">
+			<input class="form-check-input delete-input-check" type="checkbox" value="news">
+			<label class="form-check-label" for="flexCheckDefault">
+				News
+			</label>
+		  </div>
+		  <div class="form-check">
+			<input class="form-check-input delete-input-check" type="checkbox" value="template_block">
+			<label class="form-check-label" for="flexCheckDefault">
+				Template Block
+			</label>
+		  </div>
+		  <div class="form-check">
+			<input class="form-check-input delete-input-check" type="checkbox" value="site_variables">
+			<label class="form-check-label" for="flexCheckDefault">
+				Site Variables
+			</label>
+		  </div>
+		  <div class="form-check">
+			<input class="form-check-input delete-input-check" type="checkbox" value="" id="theme_configuration">
+			<label class="form-check-label" for="flexCheckDefault">
+				Theme Configuration
+			</label>
+		  </div>
+		</div>
+		<div class = 'select-btns'>
+			<button type="button" class="btn btn-primary" id = 'select-all-btn'>Select All</button>
+			<button type="button" class="btn btn-secondary" id = 'unselect-all-btn'>Unselect All</button>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-secondary" data-dismiss="modal" id = 'delete-modal-close-btn'>Close</button>
+		  <button type="button" class="btn btn-primary" style="background-color:red;" id = 'dummy-delete-btn'>Delete</button>
+		</div>
+	  </div>
+	</div>
+</div>
+
+<div class="container-fluid page__container">
+	<div class="card document-card">
+		<div class="row mb-4 mt-4 mr-2">
+			<div class="col-md-12">
+				<div style="text-align: right">
+					<a href="{% url 'dashboard:clients-create' %}" class="btn btn-outline-primary">
+						<i class="fa fa-plus"></i>&nbsp; Add Client
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="row ml-2 mr-2 mb-2 mt-2">
+			<div class="col-sm-12 document-table-space">
+				<table class="table w-full no-footer" role="grid">
+					<thead class="table-space-top-bottom">
+						<tr role="row">
+							<th>S.N</th>
+							<th>Name</th>
+							<th>Domain Name</th>
+							<th>Paid Till</th>
+							<th>Is Active?</th>
+							<th>Created At</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for client in object_list %}
+						<tr>
+							<td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+							<td>{{ client.name }}</td>
+							<td>
+								<a href="{{ client.get_client_url }}" target="_blank" rel="noopener noreferrer">{{ client.primary_domain_name }}</a>
+							</td>
+							<td>{{ client.paid_until }}</td>
+							<td>{{ client.is_enabled }}</td>
+							<td>{{ client.created_on }}</td>
+							<td>
+								<div class="btn-group" role="group" style="margin:auto;">
+									
+									<a {% if client.request %}data-phone="{{ client.request.phone_number }}" {% endif %}
+										data-id="{{ client.pk }}" data-name="{{ client.name }}"
+										href="{% url 'dashboard:clients-populate-data' client.pk %}"
+										class="btn-populate btn-sm btn btn-info btn-success-space">
+										Populate Data</a>
+									
+									<a href="{% url 'dashboard:clients-update' client.id %}" class="btn-sm btn btn-info btn-success-space" data-toggle="tooltip" data-original-title='Modify'>
+										<i class="fa fa-pencil-alt"></i>
+									</a>
+
+								  
+									<a href="{% url 'dashboard:domains-list' client.id %}" class="btn-sm btn btn-success btn-success-space" data-toggle="tooltip" data-original-title='Domains'>
+										<i class="fa fa-globe" aria-hidden="true"></i>
+									</a>
+									<a href="{% url 'dashboard:clients-user-create' client.id%}" class="btn-sm btn btn-danger" data-toggle="tooltip" data-original-title='Create User' >
+										<i class="far fa-user"></i>
+									</a>
+{% comment %} 								  
+									<a href="" class="btn-sm btn btn-danger ml-1 data-delete-out-btn" data-toggle="tooltip" data-original-title='Remove Dummy Data' data-client={{ client.id }}>
+										<i class="fa fa-trash" data-client={{ client.id }}></i>
+									</a> {% endcomment %}
+
+								   
+								</div>
+							</td>
+						</tr>
+						{% endfor %}
+						
+					</tbody>
+				</table>
+				{% include 'dashboard/base/pagination.html' %}
+			</div>
+		</div>
+		<div class="loader-wrapper">
+			<div class="group"> 
+				<div class="bigSqr">
+					<div class="square first"></div>
+					<div class="square second"></div>
+					<div class="square third"></div>
+					<div class="square fourth"></div>
+				</div>
+				<div class="text">Preparing your data</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<div class="modal" id="populateModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<!-- Modal Header -->
+			<div class="modal-header">
+				<h4 class="modal-title" id="populateHeading">Modal Heading</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<!-- Modal body -->
+			<div class="modal-body">
+
+				<form method="POST" id="populateForm" action="#" enctype='multipart/form-data'>
+					{% csrf_token %}
+					<div class="form-check">
+						<label class="form-check-label">
+							<input type="checkbox" class="form-check-input" name="group"> Default Group and Permissions
+						</label>
+					</div>
+					<div class="form-check">
+						<label class="form-check-label">
+							<input type="checkbox" class="form-check-input" name="holidays" id="holidaysCheckbox"> Holidays
+						</label>
+					</div>
+
+
+					<div id="calendarOptions" style="display: none; margin-top:10px">
+						<label for="calendarType">Select Calendar Type:</label>
+						<select id="calendarType" name="calendar_type">
+							<option value="nepali">Nepali Calendar</option>
+							<option value="english">English Calendar</option>
+						</select>
+					</div>
+
+					<div class="form-check">
+						<label class="form-check-label">
+							<input type="checkbox" class="form-check-input" name="service" id="serviceCheckbox"> Services
+						</label>
+					</div>
+					<div id="serviceFields" style="display: none; margin-top:10px">
+					<div class="form-group">
+						<label for="serviceFile">Service File:</label>
+						<input type="file" class="form-control-file" id="serviceFile" name="service_file">
+					</div>
+					<p>Sample Service: <a href="{% static 'samples/service.json' %}" target="__blank" id="sampleServiceLink" download>Download</a></p>
+
+				</div>
+					<div class="form-check">
+						<label class="form-check-label">
+							<input type="checkbox" class="form-check-input" name="office_hrs" id="officeHoursCheckbox"> Office hours
+						</label>
+					</div>
+
+					<div id="officeHoursFields" style="display: none; margin-top:10px">
+						<div class="form-group">
+							<label for="officeStartTime">Start Time:</label>
+							<input type="time" class="form-control" id="officeStartTime" name="start_time"  value="09:00">
+						</div>
+						<div class="form-group">
+							<label for="officeEndTime">End Time:</label>
+							<input type="time" class="form-control" id="officeEndTime" name="end_time" value="18:00">
+						</div>
+					</div>
+
+					<br>
+					<button type="submit" class="btn btn-primary">Populate Data</button>
+				</form>
+
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<script>
+	$('.data-delete-out-btn').on('click', (e) => {
+		e.preventDefault();
+		var client_id = e.target.dataset.client;
+		$('#dummy-delete-btn').attr('data-client', client_id);
+		$('#myModal').appendTo("body").modal('show');
+		$('#remove-dump-modal').appendTo('body').modal('show');
+	});
+
+	$('#select-all-btn').on('click', (e) => {
+		e.preventDefault();
+		$('.delete-input-check').prop('checked', true);
+	});
+
+	$('#unselect-all-btn').on('click', (e) => {
+		e.preventDefault();
+		$('.delete-input-check').prop('checked', false);
+	});
+
+	$('#dummy-delete-btn').on('click', (e) => {
+		e.preventDefault();
+		var client_id = e.target.dataset.client;
+		var checks = document.getElementsByClassName('delete-input-check');
+		var to_delete = [];
+		var csrf_token = getCookie('csrftoken');
+		for (let i = 0; i < checks.length; i++)
+		{
+			if (checks[i].checked == true) {
+				to_delete.push(checks[i].value)
+			}
+		}
+		$.ajax({
+			type: 'POST',
+			url: '/saas-manager/client/' + client_id + '/delete/dummy/data/',
+			headers: {
+				'X-CSRFToken': csrf_token
+			},
+			data: {
+				'to_delete': to_delete
+			},
+			dataType: 'json',
+			success: (data) => {
+				console.log(data);
+			},
+			error: (err) => {
+				console.log(err);
+			}
+		});
+
+		$('#delete-modal-close-btn').click();
+		$('#dummy-delete-btn').attr('data-client', '');
+		$('.delete-input-check').prop('checked', false);
+
+		Swal.fire(
+			'Success',
+			'Process to delete dummy data has started !',
+			'success'
+		)
+	});
+
+</script>
+<script>
+$(document).ready(function(){
+	$('.wpmigrate').on('click',function(){
+		var dataURL = $(this).attr('data-href');
+		$('.pfbody').load(dataURL,function(){
+			$('#pf2Modal').modal({show:true});
+		});
+	});
+});
+</script>
+
+<script>
+	$('body').on('click', '.data-roll-out-btn', function (e) {
+			e.preventDefault();
+			console.log('button')
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "Are you sure you want to add dummy data to your news site ?",
+				type: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, roll out data!'
+			}).then((result) => {
+				if (result.value) {
+					window.location.href = $(this).attr('href');
+				}
+			})
+		});
+</script>
+
+
+
+{% endblock %}
+
+
+{% block script %}
+<script>
+
+	$('.btn-populate').click(function (e) {
+		e.preventDefault();
+		$('#populateHeading').html($(this).data('name'));
+		$('#populateForm').attr('action', $(this).attr('href'))
+		$(`#populateModal`).prependTo("body");
+		$('#populateModal').modal('show');
+
+	})
+
+
+	
+</script>
+
+<script>
+    const holidaysCheckbox = document.getElementById('holidaysCheckbox');
+    const calendarOptions = document.getElementById('calendarOptions');
+
+	calendarOptions.style.display = 'none';
+    holidaysCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            calendarOptions.style.display = 'block';
+        } else {
+            calendarOptions.style.display = 'none';
+        }
+    });
+</script>
+
+<script>
+    const serviceCheckbox = document.getElementById('serviceCheckbox');
+    const sampleServiceLink = document.getElementById('sampleServiceLink');
+
+    serviceCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            serviceFields.style.display = 'block';
+        } else {
+            serviceFields.style.display = 'none';
+        }
+    });
+</script>
+
+
+<script>
+    const officeHoursCheckbox = document.getElementById('officeHoursCheckbox');
+    const officeHoursFields = document.getElementById('officeHoursFields');
+
+    officeHoursCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            officeHoursFields.style.display = 'block';
+        } else {
+            officeHoursFields.style.display = 'none';
+        }
+    });
+</script>
+
+
+{% endblock %}
+

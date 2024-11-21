@@ -1,0 +1,53 @@
+{% extends "dashboard/base/index.html" %}
+
+{% load static %}
+
+{% block title %}Add Domain for {{ client.name }} {% endblock %}
+
+{% block content %}
+<div class="container-fluid page__container">
+    <div class="card card-form form-header-layout">
+        <h1 style="padding: 27px !important;">Add Domain for {{ client.name }} </h1>
+        <div class="row no-gutters" style="border-top: 1px solid #EFEFEF">
+            <div class="col-lg-12 card-form__body card-body pomelo-form-card" style="background:none !important;">
+                <form method="post" action="" enctype="multipart/form-data" autocomplete="off">
+                    
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="form-group" >
+                        <label>{{ field.label }}{% if field.field.required %}* {% endif %}</label>
+                        {{ field }}
+                        <span style="color:red;">{{ field.errors|striptags|safe }}</span>
+                    </div>
+                    {% endfor %}    
+
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    {% block script %}
+    <script>
+    $(function(){
+       $('#id_schema_name').keyup(function(e){
+           var nowval = $(this).val();
+           nowval=nowval.replace(/\s+/g, '-');
+           $(this).val(nowval);
+           if (nowval==''){
+               var newval = '';
+           }
+           else
+           {
+                var newval = nowval + '.snowberrycms.com';
+
+           }
+           $('#id_primary_domain_name').val(newval);
+       }) ;
+    });
+    </script>
+        {% endblock %}
+{% endblock %}
+

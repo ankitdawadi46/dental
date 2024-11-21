@@ -1,0 +1,238 @@
+{% extends 'dashboard/base/index.html' %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block subtitle %} Dashboard {% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="col-xl-12 col-md-12 col-lg-12">
+    <div class="row">
+       <div class="col-xl-4">
+          <div class="card overflow-hidden">
+             <div class="">
+                <div class="row">
+                   <div class="col-7">
+                      <div class="text-primary p-3">
+                         <h5 class="text-primary">Welcome Back !</h5>
+                         <p>{{request.user.get_full_name|default:"SAAS ADMIN"}}</p>
+                      </div>
+                   </div>
+                   <div class="col-5 align-self-end">
+                      <img src="{% static 'assets/images/profile-img.png' %}" alt="" class="img-fluid">
+                   </div>
+                </div>
+             </div>
+            
+          </div>
+
+       </div>
+       <div class="col-xl-8">
+          <div class="row">
+             <div class="col-md-4">
+                <div class="card mini-stats-wid">
+                   <div class="card-body">
+                      <div class="d-flex">
+                         <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Total Patient</p>
+                            <h4 class="mb-0">{{client_stats.total_clients}}</h4>
+                         </div>
+                         <div class="flex-shrink-0 align-self-center">
+                            <i class="mdi mdi-clock align-items-center" style="
+                               color: #424e79;
+                               "></i>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <div class="col-md-4">
+                <div class="card mini-stats-wid">
+                   <div class="card-body">
+                      <div class="d-flex">
+                         <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Active Clients</p>
+                            <h4 class="mb-0">{{client_stats.active_clients}}</h4>
+                         </div>
+                         <div class="flex-shrink-0 align-self-center">
+                            <i class="mdi mdi-file-outline  align-items-center" style="
+                               color: #424e79;
+                               "></i>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <div class="col-md-4">
+                <div class="card mini-stats-wid">
+                   <div class="card-body">
+                      <div class="d-flex">
+                         <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Trial Clients</p>
+                            <h4 class="mb-0">{{client_stats.trial_clients}}</h4>
+                         </div>
+                         <div class="flex-shrink-0 align-self-center">
+                            <i class="mdi mdi-account-multiple-outline align-items-center" style="
+                               color: #424e79;
+                               "></i>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+          <!-- end row -->
+          
+       </div>
+    </div>
+ </div>
+
+ <div class="col-xl-12 col-md-12 col-lg-12">
+    <div class="row">
+       <div class="col-xl-8">
+          <div class="card overflow-hidden">
+            <div id="dashboard-col-8" class="card-body" bis_skin_checked="1">
+                <div class="card-body ">
+                   <div class="card-title">
+                      <h4> PAtient Retention
+                         
+                      </h4>
+                   </div>
+                   <div style="margin-right:15px">
+                   <div id="client_chart" height="200" width="180" ></div>
+                   </div>
+                   
+ 
+             </div>
+
+            </div>
+            
+          </div>
+
+       </div>
+       <div class="col-xl-4">
+
+        <div class="card overflow-hidden">
+        <div id="dashboard-col-8" class="card-body" bis_skin_checked="1">
+            <div class="card-body ">
+               <div class="card-title">
+                  <h4> Pending Payment 
+                     
+                  </h4>
+               </div>
+               <div class="d-flex align-items-start mb-3 justify-content-between" bis_skin_checked="1">
+                    
+                {% if payment_pending %}
+                
+                <table class="table table-bordered dt-responsive  nowrap w-100 col-12" style = "width:100%; height: 357px; display: block; overflow-x: auto; white-space: nowrap;">
+                   <thead>
+                      <tr>
+                       <th style = "width:2%">Client Name</th>
+                       <th style = "width:2% ">Due Passed</th>        
+                      </tr>
+                   </thead>
+                   <tbody>
+                      {% for payment in payment_pending %}
+                      <tr>
+    
+                         <td> 
+                            <a href="" style="color:black">
+                            {{payment.name}}
+                            </a>
+                         </td>
+                         <td>
+                            
+                           
+                            <span class="stat_text" style="border:1px solid red ; color:red ; padding:5px; border-radius: 5px;"> {{payment.time_since_due_passed}} ago</span></p>
+                           
+                         </td>
+                      </tr>
+                      {% endfor %}
+                   </tbody>
+                </table>
+
+                {% else %}
+                <p style="color:green">All the dues are paid</p>
+                
+                {% endif %}
+
+              </div>
+
+              
+               
+
+             </div>
+
+        </div>
+    </div>
+          
+          
+       </div>
+    </div>
+ </div>
+
+
+        
+   {% endblock %}
+
+
+   {% block script %}
+   
+   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+   
+   <script>
+
+
+    var options = {
+        series: [{
+        name: 'Count',
+        data: {{client_data.counts|safe}}
+      }],
+        chart: {
+        type: 'bar',
+        height: 350
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '55%',
+          endingShape: 'rounded'
+        },
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        show: true,
+        width: 2,
+        colors: ['transparent']
+      },
+      xaxis: {
+        categories: {{client_data.months|safe}},
+      },
+      yaxis: {
+        title: {
+          text: 'Total'
+        }
+      },
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return val
+          }
+        }
+      }
+      };
+
+      var chart = new ApexCharts(document.querySelector("#client_chart"), options);
+      chart.render();
+    
+   </script>
+
+   
+   {% endblock script %}

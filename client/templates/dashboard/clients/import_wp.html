@@ -1,0 +1,22 @@
+<form class="form" action="{% url 'dashboard:migrate-from-wp' client.id %}" method="POST">
+<div class="col-md-12 text-center">
+    <img src="https://s.w.org/style/images/about/WordPress-logotype-standard.png" style="width:80%">
+
+</div>
+
+
+
+<h5 class="mb-3">Client: {{client}}</h5>
+         {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="form-group" >
+                        <label>{{ field.label }}{% if field.field.required %}* {% endif %}</label>
+                        {{ field }}
+                        <span style="color:red;">{{ field.errors|striptags|safe }}</span>
+                    </div>
+                    {% endfor %}
+            <input type="submit" id="submit" class="btn btn-success" value="Start Migration">
+
+</form>
+

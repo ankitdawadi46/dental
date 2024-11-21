@@ -1,0 +1,215 @@
+{% extends "dashboard/base/index.html" %}
+
+{% load static %}
+
+{% block title %}payments {% endblock %}
+
+{% block style %}
+<style>
+    body {
+    background: #0AE;
+    text-align: center;
+    line-height: 100vh;
+    }
+
+    .group {
+    position: relative;
+    display: inline-block;
+    line-height: 16px;
+    }
+
+    .bigSqr {
+    position: relative;
+    display: inline-block;
+    left:37%;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    transform-origin: bottom left;
+    -webkit-animation: bigSqrShrink 1s linear infinite;
+            animation: bigSqrShrink 1s linear infinite;
+    }
+
+    .square {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #123088;
+    }
+
+    .first {
+    left: 0px;
+    top: 20px;
+    }
+
+    .second {
+    left: 20px;
+    top: 20px;
+    -webkit-animation: drop2 1s linear infinite;
+            animation: drop2 1s linear infinite;
+    }
+
+    .third {
+    left: 0px;
+    top: 0px;
+    -webkit-animation: drop3 1s linear infinite;
+            animation: drop3 1s linear infinite;
+    }
+
+    .fourth {
+    left: 20px;
+    top: 0px;
+    -webkit-animation: drop4 1s linear infinite;
+            animation: drop4 1s linear infinite;
+    }
+
+    .text {
+    line-height: 16px;
+    font-family: "Open Sans", "Roboto", Arial, sans-serif;
+    font-weight: 400;
+    color: #123088;
+    display: block;
+    margin: 10px auto;
+    padding: 3px;
+    }
+
+    @-webkit-keyframes bigSqrShrink {
+    0% {
+        transform: scale(1);
+    }
+    90% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.5);
+    }
+    }
+
+    @keyframes bigSqrShrink {
+    0% {
+        transform: scale(1);
+    }
+    90% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.5);
+    }
+    }
+    @-webkit-keyframes drop2 {
+    0% {
+        transform: translateY(-50px);
+    }
+    25% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop2 {
+    0% {
+        transform: translateY(-50px);
+    }
+    25% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @-webkit-keyframes drop3 {
+    0% {
+        transform: translateY(-50px);
+    }
+    50% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop3 {
+    0% {
+        transform: translateY(-50px);
+    }
+    50% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @-webkit-keyframes drop4 {
+    0% {
+        transform: translateY(-50px);
+    }
+    75% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+    @keyframes drop4 {
+    0% {
+        transform: translateY(-50px);
+    }
+    75% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(0);
+    }
+    }
+</style>
+<style>
+    .loader-wrapper{
+        display:none;
+        position:fixed;
+        top:0;
+        bottom:0;
+        right:0;
+        left:0;
+        background:#fff;
+    }
+    .group{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+    }
+
+</style>
+{% endblock%}
+
+{% block content %}
+<div class="container-fluid page__container">
+    <div class="card card-form form-header-layout" style="position:relative;">
+        <h1 style="padding: 27px !important;">Payments </h1>
+        <div class="row no-gutters" style="border-top: 1px solid #EFEFEF">
+            <div class="col-lg-12 card-form__body card-body pomelo-form-card" style="background:none !important;">
+                <form method="post"{% if not object %} action="{% url 'dashboard:payments-create' %}" id="client-form-id" {% endif %} enctype="multipart/form-data" autocomplete="off">
+                    
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="form-group" >
+                        <label>{{ field.label }}{% if field.field.required %}* {% endif %}</label>
+                        {{ field }}
+                        <span style="color:red;">{{ field.errors|striptags|safe }}</span>
+                    </div>
+                    {% endfor %}    
+
+                    <button type="submit" class="btn btn-primary btn-submit"><i class="fa fa-check"></i> Submit</button>
+                </form>
+                <div class=""></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
+{% endblock %}
+
