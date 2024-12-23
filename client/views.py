@@ -22,17 +22,18 @@
 # from django.contrib.sites.models import Site
 # from django.utils import timezone
 # from django.db.models import Count
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 
 # from dateutil.relativedelta import relativedelta
-from client.models import Client
+from client.models import Client, Domain
 from client.selectors.factories.client_creation_factory import ClientCreationFactory
 from client.selectors.factories.client_support_user import ClientSupportUserFactory
 from client.selectors.factories.dashboard_data_factory import DashboardDataFactory
-from client.serializers import ClientSerializer, DashboardSerializer
+from client.serializers import ClientSerializer, DashboardSerializer, DomainSerializer
 from dental_app.utils.response import BaseResponse
 
 # from .mixins import BaseMixin, CustomLoginRequiredmixin, GetDeleteMixin
@@ -102,10 +103,10 @@ class ClientViewSet(ModelViewSet):
             
             # Create the support user using the factory
             support_user_factory = ClientSupportUserFactory()
-            user, password = support_user_factory.create_support_user(client)
+            _, password = support_user_factory.create_support_user(client)
 
             return BaseResponse(
-                data={'user': user, 'password': password},
+                data={'password': password},
                 message="Support Client Created Successfully")
 
         except Client.DoesNotExist:
@@ -113,6 +114,60 @@ class ClientViewSet(ModelViewSet):
 
         except Exception as e:
             return BaseResponse(message=str(e), status=500)
+        
+
+class DomainViewSet(ModelViewSet):
+    queryset = Domain.objects.all()
+    serializer_class = DomainSerializer
+
+    def get_queryset(self):
+        """
+        Filter domains by client ID passed in the URL.
+        """
+        client_pk = self.kwargs.get("client")
+        client = get_object_or_404(Client, id=client_pk)
+        return self.queryset.filter(tenant=client).order_by("-id")
+
+    def perform_create(self, serializer):
+        """
+        Set the tenant and additional attributes during creation.
+        """
+        client_pk = self.kwargs.get("client")
+        client = get_object_or_404(Client, id=client_pk)
+        serializer.save(tenant=client, is_primary=False)
+
+    @action(detail=False, methods=["get"], url_path="list-domains")
+    def list_domains(self, request):
+        """
+        Custom action to list domains for a specific client.
+        """
+        domains = self.get_queryset()
+        serializer = self.get_serializer(domains, many=True)
+        return BaseResponse(data=serializer.data, status=200)
+
+    @action(detail=False, methods=["get"], url_path="get-client-info")
+    def get_client_info(self, request):
+        """
+        Custom action to get client information.
+        """
+        client_pk = self.kwargs.get("client")
+        client = get_object_or_404(Client, id=client_pk)
+        return BaseResponse(data={"client_id": client.id, "client_name": client.name}, status=200)
+
+    def perform_update(self, serializer):
+        """
+        Handle updates for a domain.
+        """
+        domain = self.get_object()
+        serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Handle domain deletion with success message.
+        """
+        domain = self.get_object()
+        domain.delete()
+        return BaseResponse(data={"message": "Domain Deleted Successfully"}, status=200)
         
         
 

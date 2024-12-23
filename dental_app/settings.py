@@ -32,7 +32,6 @@ ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS", default="*", cast=lambda v: [s.strip() for s in v.split(",")]
 )
 
-
 # Application definition
 
 SHARED_APPS = (
@@ -194,4 +193,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 VALID_IMAGE_FORMAT = ["jpg", "png", "jpeg", "heic", "svg"]
+
+
 

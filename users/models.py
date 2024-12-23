@@ -70,13 +70,18 @@ class AuditFields(models.Model):
             super().delete()
 
 
-class Profile(models.Model):
+class Profile(AuditFields):
+    profile_type = (
+        ("Doctor", "Doctor"),
+        ("Intern", "Intern"),
+        ("Helper", "Helper"),
+        ("Client", "Client")
+    )
     gender = (
         ("Male", "Male"),
         ("Female", "Female"),
         ("Other", "Other"),
     )
-
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -95,7 +100,9 @@ class Profile(models.Model):
     gender = models.CharField(
         ("Gender"), choices=gender, max_length=50, null=True, blank=True
     )
-    bio = models.TextField(null=True, blank=True)
+    profile_type = models.CharField(
+        ("Profile Type"), choices=profile_type, max_length=30, null=True, blank=True
+    )
     designation = models.CharField(
         ("Designation"), max_length=50, null=True, blank=True
     )
@@ -103,13 +110,10 @@ class Profile(models.Model):
     phone_number = models.CharField(
         ("Phone Number"), max_length=15, null=True, blank=True
     )
-    supervisor = models.ForeignKey(
-        User,
-        verbose_name=("Supervisor"),
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="user_supervisor",
+    nmc_no = models.CharField(
+        ("NMC No"), max_length=30, null=True, blank=True)
+    nhpc_no = models.CharField(
+        ("NHPC No"), max_length=30, blank=True, null=True
     )
 
     class Meta:
