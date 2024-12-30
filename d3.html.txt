@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teeth and Root Diagram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        svg {
+            background-color: #f4f4f4;
+            margin: 10px;
+            display: block;
+            width: 100%;
+            height: 800px;
+        }
+        .tooth {
+            fill: none;
+            stroke: black;
+            stroke-width: 2;
+        }
+        .root {
+            fill: none;
+            stroke: red;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+    <svg id="teeth-diagram"></svg>
+    <script>
+        const data = [
+            {
+                name: "Upper Right Central Incisor",
+                quadrant: "Upper Right",
+                num_roots: 1,
+                d3_points: [[10, 10], [15, 15], [10, 20], [5, 15]],
+                roots: [
+                    { name: "Root 1", d3_points: [[10, 20], [10.0, 40]] }
+                ]
+            },
+            // More teeth data here
+        ];
+
+        const svg = d3.select('#teeth-diagram');
+        const width = svg.node().getBoundingClientRect().width;
+        const height = svg.node().getBoundingClientRect().height;
+
+        // Function to draw a tooth
+        const drawTooth = (points, xOffset, yOffset) => {
+            return svg.append('polygon')
+                .attr('class', 'tooth')
+                .attr('points', points.map(d => `${d[0] + xOffset},${d[1] + yOffset}`).join(' '));
+        };
+
+        // Function to draw a root
+        const drawRoot = (rootPoints, xOffset, yOffset) => {
+            return svg.append('line')
+                .attr('class', 'root')
+                .attr('x1', rootPoints[0][0] + xOffset)
+                .attr('y1', rootPoints[0][1] + yOffset)
+                .attr('x2', rootPoints[1][0] + xOffset)
+                .attr('y2', rootPoints[1][1] + yOffset);
+        };
+
+        // Function to plot the diagram
+        const plotTeeth = (teethData) => {
+            let yOffset = 0;
+
+            teethData.forEach((toothData, index) => {
+                const xOffset = index % 2 === 0 ? 150 : 300; // Alternate between left and right positions
+
+                // Draw the tooth body
+                drawTooth(toothData.d3_points, xOffset, yOffset);
+
+                // Draw the roots
+                toothData.roots.forEach(root => {
+                    drawRoot(root.d3_points, xOffset, yOffset);
+                });
+
+                yOffset += 120; // Vertical spacing between teeth
+            });
+        };
+
+        plotTeeth(data);
+    </script>
+</body>
+</html>

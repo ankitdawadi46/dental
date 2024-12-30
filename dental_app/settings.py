@@ -38,6 +38,8 @@ SHARED_APPS = (
     'django_tenants',
     'rest_framework',
     'client.apps.ClientConfig',
+    'dental_structure',
+    'dental_plan',
 
     'django.contrib.contenttypes',
 
@@ -55,6 +57,7 @@ TENANT_APPS = (
     # your tenant-specific apps
     'appointment',
     'users',
+    'dental_plan'
 )
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
@@ -99,7 +102,7 @@ WSGI_APPLICATION = 'dental_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
-        "NAME": config("DB_NAME", default="dental", cast=str),
+        "NAME": config("DB_NAME", default="dental1", cast=str),
         "USER": config("DB_USER", default="postgres", cast=str),
         "PASSWORD": config("DB_PASSWORD", default="poonhill", cast=str),
         "PORT": config("DB_PORT", default="5432", cast=int),
@@ -142,10 +145,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
 
 
@@ -193,6 +195,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 VALID_IMAGE_FORMAT = ["jpg", "png", "jpeg", "heic", "svg"]
+ 
+AUTH_USER_MODEL = "client.CustomUser"
 
-
-
+FRONTEND_URL = "localhost:8888"

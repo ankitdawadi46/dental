@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teeth and Root Diagram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        svg {
+            background-color: #f4f4f4;
+            margin: 10px;
+            display: block;
+            width: 100%;
+            height: 800px;
+        }
+        .tooth {
+            fill: none;
+            stroke: black;
+            stroke-width: 2;
+        }
+        .root {
+            fill: none;
+            stroke: red;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+    <svg id="teeth-diagram"></svg>
+    <script>
+        const data = [
+        {
+            "name": "Upper Right Central Incisor",
+            "tooth_type": "Central Incisor",
+            "quadrant": "Upper Right",
+            "num_roots": 1,
+            "d3_points": [[10, 10], [15, 15], [10, 20], [5, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Right Lateral Incisor",
+            "tooth_type": "Lateral Incisor",
+            "quadrant": "Upper Right",
+            "num_roots": 1,
+            "d3_points": [[25, 10], [30, 15], [25, 20], [20, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                                }
+            ]
+        },
+        {
+            "name": "Upper Right Canine",
+            "tooth_type": "Canine",
+            "quadrant": "Upper Right",
+            "num_roots": 1,
+            "d3_points": [[40, 10], [45, 15], [40, 20], [35, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Right First Premolar",
+            "tooth_type": "First Premolar",
+            "quadrant": "Upper Right",
+            "num_roots": 2,
+            "d3_points": [[55, 10], [60, 15], [55, 20], [50, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Right Second Premolar",
+            "tooth_type": "Second Premolar",
+            "quadrant": "Upper Right",
+            "num_roots": 2,
+            "d3_points": [[70, 10], [75, 15], [70, 20], [65, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Right First Molar",
+            "tooth_type": "First Molar",
+            "quadrant": "Upper Right",
+            "num_roots": 3,
+            "d3_points": [[85, 10], [90, 15], [85, 20], [80, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Right Second Molar",
+            "tooth_type": "Second Molar",
+            "quadrant": "Upper Right",
+            "num_roots": 3,
+            "d3_points": [[100, 10], [105, 15], [100, 20], [95, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Right Third Molar",
+            "tooth_type": "Third Molar",
+            "quadrant": "Upper Right",
+            "num_roots": 3,
+            "d3_points": [[115, 10], [120, 15], [115, 20], [110, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left Central Incisor",
+            "tooth_type": "Central Incisor",
+            "quadrant": "Upper Left",
+            "num_roots": 1,
+            "d3_points": [[110, 10], [115, 15], [110, 20], [105, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left Lateral Incisor",
+            "tooth_type": "Lateral Incisor",
+            "quadrant": "Upper Left",
+            "num_roots": 1,
+            "d3_points": [[125, 10], [130, 15], [125, 20], [120, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left Canine",
+            "tooth_type": "Canine",
+            "quadrant": "Upper Left",
+            "num_roots": 1,
+            "d3_points": [[140, 10], [145, 15], [140, 20], [135, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left First Premolar",
+            "tooth_type": "First Premolar",
+            "quadrant": "Upper Left",
+            "num_roots": 2,
+            "d3_points": [[155, 10], [160, 15], [155, 20], [150, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left Second Premolar",
+            "tooth_type": "Second Premolar",
+            "quadrant": "Upper Left",
+            "num_roots": 2,
+            "d3_points": [[170, 10], [175, 15], [170, 20], [165, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left First Molar",
+            "tooth_type": "First Molar",
+            "quadrant": "Upper Left",
+            "num_roots": 3,
+            "d3_points": [[185, 10], [190, 15], [185, 20], [180, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left Second Molar",
+            "tooth_type": "Second Molar",
+            "quadrant": "Upper Left",
+            "num_roots": 3,
+            "d3_points": [[200, 10], [205, 15], [200, 20], [195, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Upper Left Third Molar",
+            "tooth_type": "Third Molar",
+            "quadrant": "Upper Left",
+            "num_roots": 3,
+            "d3_points": [[215, 10], [220, 15], [215, 20], [210, 15]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right Central Incisor",
+            "tooth_type": "Central Incisor",
+            "quadrant": "Lower Right",
+            "num_roots": 1,
+            "d3_points": [[10, 60], [15, 65], [10, 70], [5, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right Lateral Incisor",
+            "tooth_type": "Lateral Incisor",
+            "quadrant": "Lower Right",
+            "num_roots": 1,
+            "d3_points": [[25, 60], [30, 65], [25, 70], [20, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right Canine",
+            "tooth_type": "Canine",
+            "quadrant": "Lower Right",
+            "num_roots": 1,
+            "d3_points": [[40, 60], [45, 65], [40, 70], [35, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right First Premolar",
+            "tooth_type": "First Premolar",
+            "quadrant": "Lower Right",
+            "num_roots": 2,
+            "d3_points": [[55, 60], [60, 65], [55, 70], [50, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right Second Premolar",
+            "tooth_type": "Second Premolar",
+            "quadrant": "Lower Right",
+            "num_roots": 2,
+            "d3_points": [[70, 60], [75, 65], [70, 70], [65, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right First Molar",
+            "tooth_type": "First Molar",
+            "quadrant": "Lower Right",
+            "num_roots": 3,
+            "d3_points": [[85, 60], [90, 65], [85, 70], [80, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right Second Molar",
+            "tooth_type": "Second Molar",
+            "quadrant": "Lower Right",
+            "num_roots": 3,
+            "d3_points": [[100, 60], [105, 65], [100, 70], [95, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Right Third Molar",
+            "tooth_type": "Third Molar",
+            "quadrant": "Lower Right",
+            "num_roots": 3,
+            "d3_points": [[115, 60], [120, 65], [115, 70], [110, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left Central Incisor",
+            "tooth_type": "Central Incisor",
+            "quadrant": "Lower Left",
+            "num_roots": 1,
+            "d3_points": [[110, 60], [115, 65], [110, 70], [105, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left Lateral Incisor",
+            "tooth_type": "Lateral Incisor",
+            "quadrant": "Lower Left",
+            "num_roots": 1,
+            "d3_points": [[125, 60], [130, 65], [125, 70], [120, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left Canine",
+            "tooth_type": "Canine",
+            "quadrant": "Lower Left",
+            "num_roots": 1,
+            "d3_points": [[140, 60], [145, 65], [140, 70], [135, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left First Premolar",
+            "tooth_type": "First Premolar",
+            "quadrant": "Lower Left",
+            "num_roots": 2,
+            "d3_points": [[155, 60], [160, 65], [155, 70], [150, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left Second Premolar",
+            "tooth_type": "Second Premolar",
+            "quadrant": "Lower Left",
+            "num_roots": 2,
+            "d3_points": [[170, 60], [175, 65], [170, 70], [165, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left First Molar",
+            "tooth_type": "First Molar",
+            "quadrant": "Lower Left",
+            "num_roots": 3,
+            "d3_points": [[185, 60], [190, 65], [185, 70], [180, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left Second Molar",
+            "tooth_type": "Second Molar",
+            "quadrant": "Lower Left",
+            "num_roots": 3,
+            "d3_points": [[200, 60], [205, 65], [200, 70], [195, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        },
+        {
+            "name": "Lower Left Third Molar",
+            "tooth_type": "Third Molar",
+            "quadrant": "Lower Left",
+            "num_roots": 3,
+            "d3_points": [[215, 60], [220, 65], [215, 70], [210, 65]],
+            "roots": [
+                {
+                    "name": "Root 1",
+                    "d3_points": [[10, 20], [10.0, 40]]
+                },
+                {
+                    "name": "Root 2",
+                    "d3_points": [[55, 20], [55.5, 40]]
+                },
+                {
+                    "name": "Root 3",
+                    "d3_points": [[85, 20], [86.0, 40]]
+                }
+            ]
+        }
+    ]
+
+        const svg = d3.select('#teeth-diagram');
+        const width = svg.node().getBoundingClientRect().width;
+        const height = svg.node().getBoundingClientRect().height;
+
+        // Function to draw a tooth
+        const drawTooth = (points, xOffset, yOffset) => {
+            return svg.append('polygon')
+                .attr('class', 'tooth')
+                .attr('points', points.map(d => `${d[0] + xOffset},${d[1] + yOffset}`).join(' '));
+        };
+
+        // Function to draw a root
+        const drawRoot = (rootPoints, xOffset, yOffset) => {
+            return svg.append('line')
+                .attr('class', 'root')
+                .attr('x1', rootPoints[0][0] + xOffset)
+                .attr('y1', rootPoints[0][1] + yOffset)
+                .attr('x2', rootPoints[1][0] + xOffset)
+                .attr('y2', rootPoints[1][1] + yOffset);
+        };
+
+        // Function to plot the diagram
+        const plotTeeth = (teethData) => {
+            let yOffset = 0;
+
+            teethData.forEach((toothData, index) => {
+                const xOffset = index % 2 === 0 ? 150 : 300; // Alternate between left and right positions
+
+                // Draw the tooth body
+                drawTooth(toothData.d3_points, xOffset, yOffset);
+
+                // Draw the roots
+                toothData.roots.forEach(root => {
+                    drawRoot(root.d3_points, xOffset, yOffset);
+                });
+
+                yOffset += 120; // Vertical spacing between teeth
+            });
+        };
+
+        plotTeeth(data);
+    </script>
+</body>
+</html>

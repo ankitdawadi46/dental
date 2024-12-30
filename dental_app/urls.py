@@ -23,5 +23,7 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('client/', include('client.urls', namespace='client')),
-    path('users/', include('users.urls', namespace="users"))
+    path('users/', include('users.urls', namespace="users")),
+    path('dental-structure/', include('dental_structure.urls', namespace='dental_structure')),
+    path('dental-plan/', include('dental_plan.urls', namespace="dental_plan"))
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
