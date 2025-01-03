@@ -1,3 +1,10 @@
+from functools import wraps
+
+# from myapp.models import Client  # Adjust the import based on your app
+from django_tenants.utils import tenant_context
+
+from dental_app.utils.response import BaseResponse
+
 from .models import Client
 
 
@@ -38,3 +45,19 @@ def get_company_url(request):
         return "http://" + company.domain_url
     else:
         return root_company().domain_url
+
+
+# Assuming `tenant_context` is already implemente
+def with_tenant_context(func):
+    @wraps(func)
+    def wrapper(self, request, tenant_schema_name, *args, **kwargs):
+        try:
+            tenant = Client.objects.get(schema_name=tenant_schema_name)
+        except Client.DoesNotExist:
+            return BaseResponse(data={"error": "Tenant not found"}, status=404)
+
+        # Switch to the given tenant schema
+        with tenant_context(tenant):
+            return func(self, request, tenant_schema_name, *args, **kwargs)
+
+    return wrapper

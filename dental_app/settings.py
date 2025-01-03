@@ -39,7 +39,6 @@ SHARED_APPS = (
     'rest_framework',
     'client.apps.ClientConfig',
     'dental_structure',
-    'dental_plan',
 
     'django.contrib.contenttypes',
 

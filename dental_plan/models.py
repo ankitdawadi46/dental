@@ -16,11 +16,10 @@ class Treatment(AuditFields):
 
 class PatientCondition(AuditFields):
     name = models.CharField(max_length=255)
-    description = models.TextField()
-    condition = models.ForeignKey(Condition, on_delete=models.CASCADE, null=False, blank=False)
-    treatment = models.ForeignKey(Treatment, on_delete=models.CASCADE, null=False, blank=False)
+    description = models.TextField(null=True, blank=True)
+    condition = models.ForeignKey(Condition, on_delete=models.CASCADE, null=True, blank=True)
     severity = models.CharField(max_length=100, choices=[('Mild', 'Mild'), ('Moderate', 'Moderate'), ('Severe', 'Severe')])
-    d3_image = models.JSONField()
+    d3_image = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -28,9 +27,10 @@ class PatientCondition(AuditFields):
 
 class PatientTreatment(AuditFields):
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    treatment = models.ForeignKey(Treatment, on_delete=models.CASCADE, null=True, blank=True)
     material_used = models.CharField(max_length=255, blank=True, null=True)
-    d3_image = models.JSONField()
+    d3_image = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.name
