@@ -1,29 +1,28 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import connection
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from client.utils import with_tenant_context
+from client.utils import atomic_transaction, with_tenant_context
 from dental_app.utils.response import BaseResponse
 from dental_plan.selectors.factories.dental_data_factory import DentalDataFactory
-from dental_plan.selectors.factories.patient_full_dental_history import DentalHistoryFactory
+from dental_plan.selectors.factories.patient_full_dental_history import (
+    DentalHistoryFactory,
+)
 
-from .models import (
+from dental_plan.models import (
     Condition,
     DentalHistory,
     PatientCondition,
     PatientTreatment,
     Treatment,
 )
-from .serializers import (
+from dental_plan.serializers import (
     ConditionSerializer,
     DentalHistoryPostSerializer,
     DentalHistorySerializer,
-    PatientConditionNestedSerializer,
     PatientConditionSerializer,
-    PatientTreatmentNestedSerializer,
     PatientTreatmentSerializer,
     TreatmentSerializer,
 )
@@ -33,6 +32,7 @@ class TenantConditionTreatmentView(APIView):
     permission_classes = [AllowAny]
 
     @with_tenant_context
+    @atomic_transaction
     def get(self, request, tenant_schema_name):
         conditions = Condition.objects.all()
         treatments = Treatment.objects.all()
@@ -49,6 +49,7 @@ class TenantConditionTreatmentView(APIView):
         )
 
     @with_tenant_context
+    @atomic_transaction
     def post(self, request, tenant_schema_name):
         # Deserialize and create Condition
         condition_serializer = ConditionSerializer(
@@ -93,6 +94,7 @@ class DentalHistoryViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     @with_tenant_context
+    @atomic_transaction
     def create(self, request, tenant_schema_name, *args, **kwargs):
         data = request.data
 
@@ -125,8 +127,9 @@ class DentalHistoryViewSet(viewsets.ModelViewSet):
                 data={"error": "An unexpected error occurred", "details": str(e)},
                 status=500,
             )
-    
-    @with_tenant_context       
+
+    @with_tenant_context
+    @atomic_transaction
     def list(self, request, *args, **kwargs):
         patient_id = request.query_params.get("patient_id")
         dental_structure_id = request.query_params.get("dental_structure_id")
@@ -148,7 +151,9 @@ class DentalHistoryViewSet(viewsets.ModelViewSet):
 
         if not dental_histories.exists():
             return BaseResponse(
-                data={"error": "No data found for the given patient and dental structure."},
+                data={
+                    "error": "No data found for the given patient and dental structure."
+                },
                 status=404,
             )
 
@@ -165,7 +170,7 @@ class DentalHistoryViewSet(viewsets.ModelViewSet):
         # Serialize patient conditions and treatments with nested data
         patient_condition_serializer = PatientConditionSerializer(conditions, many=True)
         patient_treatment_serializer = PatientTreatmentSerializer(treatments, many=True)
-        
+
         return BaseResponse(
             data={
                 "dental_histories": dental_history_serializer.data,

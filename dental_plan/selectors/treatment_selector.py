@@ -5,5 +5,5 @@ from dental_plan.models import PatientTreatment
 class PatientTreatmentDataSelector(ITreatmentSelector):
     def get_treatments(self, treatment_ids):
         return PatientTreatment.objects.select_related("treatment").filter(
-            treatment_id__in=treatment_ids
+            id__in=treatment_ids
         )

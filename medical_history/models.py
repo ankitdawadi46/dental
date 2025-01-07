@@ -14,7 +14,7 @@ class MedicalHistory(AuditFields):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="patient",
+        related_name="medical_patient",
     )
     medical_history_type = models.ForeignKey(
         MedicalHistoryTypes, on_delete=models.CASCADE, null=True

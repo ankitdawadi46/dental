@@ -6,9 +6,11 @@ class PatientConditionCreationService(IPatientConditionCreation):
     def create_patient_condition(data):
         condition = Condition.objects.get(id=data['condition'])
 
-        return PatientCondition.objects.create(
+        patient_condition = PatientCondition(
             name=condition.name,
             description=data.get('condition_description'),
             condition=condition,
             severity=data.get('severity', 'Mild'),
         )
+        patient_condition.save()
+        return patient_condition

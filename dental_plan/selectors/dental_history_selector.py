@@ -5,21 +5,20 @@ from django.db.models import Prefetch
 
 class DentalHistorySelector(IDentalHistorySelector):
     def dental_history_data(self, patient_id, dental_structure_id):
-        return (
+        data =  (
             DentalHistory.objects.filter(
                 patient_id=patient_id, dental_structure_id=dental_structure_id
             )
-            # Use select_related for ForeignKey and OneToOne relations
             .select_related("condition", "dental_structure")
-            # Use prefetch_related for ManyToMany and reverse ForeignKey relations
             .prefetch_related(
                 Prefetch(
-                    "condition__patientcondition_set",
+                    "condition__condition",
                     queryset=PatientCondition.objects.select_related("condition"),
                 ),
                 Prefetch(
-                    "treatment__patienttreatment_set",  # Reverse relation or ManyToMany relation
+                    "treatment__treatment",
                     queryset=PatientTreatment.objects.select_related("treatment"),
                 ),
             )
         )
+        return data

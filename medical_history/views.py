@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from client.utils import with_tenant_context
+from dental_app.utils.permissions import IsClient, IsDoctor
 
 from .models import MedicalHistory, MedicalHistoryTypes
 from .serializers import MedicalHistorySerializer, MedicalHistoryTypesSerializer
@@ -10,7 +11,7 @@ from .serializers import MedicalHistorySerializer, MedicalHistoryTypesSerializer
 class MedicalHistoryTypesViewSet(viewsets.ModelViewSet):
     queryset = MedicalHistoryTypes.objects.all()
     serializer_class = MedicalHistoryTypesSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsClient]
     
     @with_tenant_context
     def create(self, request, *args, **kwargs):
@@ -34,7 +35,7 @@ class MedicalHistoryViewSet(viewsets.ModelViewSet):
         "patient", "medical_history_type"
     ).all()
     serializer_class = MedicalHistorySerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsDoctor]
     
     @with_tenant_context
     def create(self, request, *args, **kwargs):

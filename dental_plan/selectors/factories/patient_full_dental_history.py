@@ -5,12 +5,13 @@ from dental_plan.selectors.patient_condition_creation import PatientConditionCre
 from dental_plan.selectors.patient_dental_history import DentalHistoryService
 from dental_plan.selectors.patient_treatment_creation import PatientTreatmentCreationService
 
+
 class DentalHistoryFactory(IPatientDentalHistoryFactory):
     @transaction.atomic
     def create_full_dental_history(data):
         patient_condition = PatientConditionCreationService.create_patient_condition(data)
         patient_treatment = PatientTreatmentCreationService.create_patient_treatment(data)
-        dental_history = DentalHistoryService.create_dental_history(data)
+        dental_history = DentalHistoryService.create_dental_history(data, patient_condition, patient_treatment)
 
         return {
             "dental_history": dental_history,
