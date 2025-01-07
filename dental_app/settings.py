@@ -49,14 +49,19 @@ SHARED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.admin',
-    'django_celery_beat'
+    'django_celery_beat',
+    'django_filters'
 )
 
 TENANT_APPS = (
     # your tenant-specific apps
     'appointment',
     'users',
-    'dental_plan'
+    'dental_plan',
+    'leave',
+    'notice',
+    'stock',
+    'medical_history'
 )
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]

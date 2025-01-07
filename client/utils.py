@@ -1,5 +1,7 @@
 from functools import wraps
 
+from django.db import transaction
+
 # from myapp.models import Client  # Adjust the import based on your app
 from django_tenants.utils import tenant_context
 
@@ -59,5 +61,18 @@ def with_tenant_context(func):
         # Switch to the given tenant schema
         with tenant_context(tenant):
             return func(self, request, tenant_schema_name, *args, **kwargs)
+
+    return wrapper
+
+
+def atomic_transaction(func):
+    """
+    Decorator to wrap a function within a transaction.atomic block.
+    Rolls back the transaction if any exception is raised.
+    """
+
+    def wrapper(*args, **kwargs):
+        with transaction.atomic():
+            return func(*args, **kwargs)
 
     return wrapper

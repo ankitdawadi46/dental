@@ -14,16 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
-from django.conf.urls.static import static
-from django.conf import settings
 
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('client/', include('client.urls', namespace='client')),
-    path('users/', include('users.urls', namespace="users")),
-    path('dental-structure/', include('dental_structure.urls', namespace='dental_structure')),
-    path('dental-plan/', include('dental_plan.urls', namespace="dental_plan"))
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("admin/", admin.site.urls),
+    path("client/", include("client.urls", namespace="client")),
+    path("users/", include("users.urls", namespace="users")),
+    path("notice/", include("notice.urls", namespace="notice")),
+    path("leave/", include("leave.urls", namespace="leave")),
+    path("stock/", include("stock.urls", namespace="stock")),
+    path("medical-history/", include("medical_history.urls", namespace="medical_history")),
+    path(
+        "dental-structure/",
+        include("dental_structure.urls", namespace="dental_structure"),
+    ),
+    path("dental-plan/", include("dental_plan.urls", namespace="dental_plan")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
