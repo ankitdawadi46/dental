@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -16,7 +17,9 @@ from dental_plan.models import (
     DentalHistory,
     PatientCondition,
     PatientTreatment,
+    Payment,
     Treatment,
+    TreatmentMaterialUsed,
 )
 from dental_plan.serializers import (
     ConditionSerializer,
@@ -24,6 +27,8 @@ from dental_plan.serializers import (
     DentalHistorySerializer,
     PatientConditionSerializer,
     PatientTreatmentSerializer,
+    PaymentSerializer,
+    TreatmentMaterialsUsedSerializer,
     TreatmentSerializer,
 )
 
@@ -86,6 +91,82 @@ class PatientConditionViewSet(viewsets.ModelViewSet):
 class PatientTreatmentViewSet(viewsets.ModelViewSet):
     queryset = PatientTreatment.objects.all()
     serializer_class = PatientTreatmentSerializer
+    
+
+class PaymentViewset(viewsets.ModelViewSet):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    permission_classes = [AllowAny]
+    
+    @with_tenant_context
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    @with_tenant_context
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+    
+    @with_tenant_context
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+    
+    @with_tenant_context
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
+
+class TreatmentMaterialUsedViewset(viewsets.ModelViewSet):
+    queryset = TreatmentMaterialUsed.objects.all()
+    serializer_class = TreatmentMaterialsUsedSerializer
+    permission_classes = [AllowAny]
+    
+    @with_tenant_context
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    @with_tenant_context
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+    
+    @with_tenant_context
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+    
+    @with_tenant_context
+    def destroy(self, request, *args, **kwargs):
+        # Retrieve the object safely
+        instance = self.get_object_or_404_instance(kwargs)
+
+        # Perform the delete operation
+        self.perform_destroy(instance)
+
+        # Return a success response
+        return BaseResponse(
+            data={"detail": "Object deleted successfully."},
+            status=204)
+
+    def perform_destroy(self, instance):
+        """
+        Perform the actual deletion of the instance.
+        You can customize this if you need any pre-delete or post-delete logic.
+        """
+        instance.delete(hard=True)
+
+    def get_object_or_404_instance(self, kwargs):
+        """
+        Retrieves the object using get_object() or get_object_or_404.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Pass kwargs to filter the object
+        lookup_url_kwarg = self.lookup_field  # Typically 'pk'
+        filter_kwargs = {self.lookup_field: kwargs.get(lookup_url_kwarg)}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+
+        # Check for object permissions
+        self.check_object_permissions(self.request, obj)
+
+        return obj
 
 
 class DentalHistoryViewSet(viewsets.ModelViewSet):
@@ -144,6 +225,7 @@ class DentalHistoryViewSet(viewsets.ModelViewSet):
         dental_history_factory = DentalDataFactory.get_dental_history_factory()
         condition_factory = DentalDataFactory.get_condition_factory()
         treatment_factory = DentalDataFactory.get_treatment_factory()
+        payment_factory = DentalDataFactory.get_payment_factory()
 
         dental_histories = dental_history_factory.dental_history_data(
             patient_id, dental_structure_id
@@ -159,23 +241,25 @@ class DentalHistoryViewSet(viewsets.ModelViewSet):
 
         # Serialize the dental histories
         dental_history_serializer = DentalHistorySerializer(dental_histories, many=True)
-
         # Fetch related conditions and treatments for patient data
         condition_ids = dental_histories.values_list("condition__id", flat=True)
         treatment_ids = dental_histories.values_list("treatment__id", flat=True)
 
         conditions = condition_factory.get_conditions(condition_ids)
         treatments = treatment_factory.get_treatments(treatment_ids)
+        payments = payment_factory.get_payments(treatment_ids)
 
         # Serialize patient conditions and treatments with nested data
         patient_condition_serializer = PatientConditionSerializer(conditions, many=True)
         patient_treatment_serializer = PatientTreatmentSerializer(treatments, many=True)
-
+        payments = PaymentSerializer(payments, many=True)
+        
         return BaseResponse(
             data={
                 "dental_histories": dental_history_serializer.data,
                 "patient_conditions": patient_condition_serializer.data,
                 "patient_treatments": patient_treatment_serializer.data,
+                "payments": payments.data
             },
             status=200,
         )

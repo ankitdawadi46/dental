@@ -47,6 +47,7 @@ class CustomUser(AbstractUser):
     # Remove the 'username' field or make it optional
     username = models.CharField(max_length=150, blank=True, null=True, unique=False)
     first_name = models.CharField(max_length=150, blank=True, null=True, unique=False)
+    middle_name = models.CharField(max_length=150, blank=True, null=True, unique=False)
     last_name = models.CharField(max_length=150, blank=True, null=True, unique=False)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []  # No additional required fields

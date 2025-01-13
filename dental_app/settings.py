@@ -39,6 +39,7 @@ SHARED_APPS = (
     'rest_framework',
     'client.apps.ClientConfig',
     'dental_structure',
+    'debug_toolbar',
 
     'django.contrib.contenttypes',
 
@@ -61,12 +62,14 @@ TENANT_APPS = (
     'leave',
     'notice',
     'stock',
-    'medical_history'
+    'medical_history',
+    'office'
 )
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

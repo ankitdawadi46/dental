@@ -1,31 +1,39 @@
 from rest_framework import serializers
-from .models import Condition, DentalHistory, PatientCondition, PatientTreatment, Treatment
+
+from dental_plan.models import (
+    Condition,
+    DentalHistory,
+    PatientCondition,
+    PatientTreatment,
+    Payment,
+    Treatment,
+    TreatmentMaterialUsed,
+)
+
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Condition
-        fields = ['id', 'name']
+        fields = ["id", "name"]
 
 
 class TreatmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Treatment
-        fields = ['id', 'name']
-        
-        
+        fields = ["id", "name"]
+
+
 class PatientConditionSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = PatientCondition
-        fields = '__all__'
-        
+        fields = "__all__"
+
 
 class PatientTreatmentSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = PatientTreatment
         fields = "__all__"
-        
+
 
 class PatientConditionNestedSerializer(serializers.ModelSerializer):
     condition = ConditionSerializer()
@@ -33,25 +41,36 @@ class PatientConditionNestedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PatientCondition
-        fields = ["id", "name", "description", "condition", "treatment", "severity", "d3_image"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "condition",
+            "treatment",
+            "severity",
+            "d3_image",
+        ]
 
 
 class PatientTreatmentNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientTreatment
         fields = ["id", "name", "description", "material_used", "d3_image"]
-        
+
 
 class DentalHistoryPostSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = DentalHistory
-        fields = '__all__'
-        
+        fields = "__all__"
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = "__all__"
+
 
 class DentalHistorySerializer(serializers.ModelSerializer):
-    condition = ConditionSerializer()
-    treatment = TreatmentSerializer()
 
     class Meta:
         model = DentalHistory
@@ -66,4 +85,8 @@ class DentalHistorySerializer(serializers.ModelSerializer):
         ]
         
 
-
+class TreatmentMaterialsUsedSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = TreatmentMaterialUsed
+        fields = "__all__"

@@ -24,16 +24,16 @@
 # from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 
 # from dateutil.relativedelta import relativedelta
-from client.models import Client, Domain
+from client.models import Client, CustomUser, Domain, Profile
 from client.selectors.factories.client_creation_factory import ClientCreationFactory
 from client.selectors.factories.client_support_user import ClientSupportUserFactory
 from client.selectors.factories.dashboard_data_factory import DashboardDataFactory
-from client.serializers import ClientSerializer, DashboardSerializer, DomainSerializer
+from client.serializers import ClientSerializer, ClinicProfileSerializer, CustomUserSerializer, DashboardSerializer, DomainSerializer, ProfileSerializer
 from dental_app.utils.response import BaseResponse
 
 # from .mixins import BaseMixin, CustomLoginRequiredmixin, GetDeleteMixin
@@ -115,7 +115,98 @@ class ClientViewSet(ModelViewSet):
         except Exception as e:
             return BaseResponse(message=str(e), status=500)
         
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+        url_path="check-if-user-exists")
+    def check_if_user_already_exists(self, request: Request):
+        email = request.data.get('email')
+        user_profile = Profile.objects.select_related('user').filter(user__email=email).first()
 
+        if user_profile:
+            return BaseResponse(
+                data={
+                    'message': f'The user already exists as {user_profile.profile_type}',
+                    'autoredirect': False
+                }
+            )
+        return BaseResponse(
+            data={
+                'message': "The user does not exist",
+                'autoredirect': True
+            }
+        )
+            
+    @action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[IsAuthenticated],
+        url_path="create-user")
+    def create_user(self, request: Request):
+        data = request.data
+        if data.get('profile_type') == 'Doctor' and not data.get('nmc_no'):
+            return BaseResponse(
+                message="NMC Number is required for Doctor",
+                status=400)
+        if data.get("profile_type") == 'Helper' and not data.get('nhpc_no'):
+            return BaseResponse(
+                message="NHPC Number is required for Helper",
+                status=400
+            )
+        user_data = {
+            "email": data.get("email"),
+            "first_name": data.get("first_name"),
+            "middle_name": data.get("middle_name"),
+            "last_name": data.get("last_name"),
+        }
+        profile_data = {
+            "photo": data.get("photo"),
+            "dob": data.get("dob"),
+            "gender": data.get("gender"),
+            "profile_type": data.get("profile_type"),
+            "designation": data.get("designation"),
+            "address": data.get("address"),
+            "phone_number": data.get("phone_number"),
+            "nmc_no": data.get("nmc_no"),
+            "nhpc_no": data.get("nhpc_no")
+        }
+        clinic_profile_data = {
+            "clinic": data.get("clinic")
+        }
+        user_serializer = CustomUserSerializer(data=user_data)
+        if not user_serializer.is_valid():
+            return BaseResponse(
+                data={"message": "Invalid user data", "errors": user_serializer.errors},
+                status=400
+            )
+        user = user_serializer.save()
+        
+        profile_data['user'] = user.id
+        profile_serializer = ProfileSerializer(data=profile_data)
+        if not profile_serializer.is_valid():
+            return BaseResponse(
+                data={"message": "Invalid profile data", "errors": profile_serializer.errors},
+                status=400
+            )
+        profile = profile_serializer.save()
+        
+        # Validate and create ClinicProfile (if applicable)
+        if clinic_profile_data.get('clinic'):
+            clinic_profile_data['user'] = profile.id
+            clinic_profile_serializer = ClinicProfileSerializer(data=clinic_profile_data)
+            if not clinic_profile_serializer.is_valid():
+                return BaseResponse(
+                    data={"message": "Invalid clinic profile data", "errors": clinic_profile_serializer.errors},
+                    status=400
+                )
+            clinic_profile_serializer.save()
+
+        return BaseResponse(
+            {"message": "User, profile, and clinic profile created successfully"},
+            status=201
+        )
+        
 class DomainViewSet(ModelViewSet):
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer

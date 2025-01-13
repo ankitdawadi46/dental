@@ -19,6 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from dental_app.views import error_api
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -33,4 +34,11 @@ urlpatterns = [
         include("dental_structure.urls", namespace="dental_structure"),
     ),
     path("dental-plan/", include("dental_plan.urls", namespace="dental_plan")),
+    path("office/", include("office.urls", namespace="office")),
+    path("error-api/", error_api, name="error_api")
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]

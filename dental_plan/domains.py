@@ -55,3 +55,9 @@ class IDentalHistoryDataFactory(ABC):
     @abstractmethod
     def get_dental_history_factory():
         pass
+    
+
+class IPaymentSelector(ABC):
+    @abstractmethod
+    def get_payments(self):
+        pass

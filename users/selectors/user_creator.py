@@ -12,11 +12,13 @@ class UserCreator(IUserCreator):
         password: str,
         first_name: str = None,
         last_name: str = None,
+        middle_name: str = None,
         is_superuser: bool = False,
         is_staff: bool = False
     ) -> User:
         user, _ = User.objects.get_or_create(
-            username=email, email=email, first_name=first_name, last_name=last_name
+            username=email, email=email, first_name=first_name, last_name=last_name,
+            middle_name=middle_name
         )
         user.is_superuser = is_superuser
         user.is_staff = is_staff
