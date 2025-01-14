@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+import dj_database_url
 
 from pathlib import Path
 
@@ -40,6 +41,7 @@ SHARED_APPS = (
     'client.apps.ClientConfig',
     'dental_structure',
     'debug_toolbar',
+    'corsheaders',
 
     'django.contrib.contenttypes',
 
@@ -69,6 +71,7 @@ TENANT_APPS = (
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -108,15 +111,14 @@ WSGI_APPLICATION = 'dental_app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django_tenants.postgresql_backend',
-        "NAME": config("DB_NAME", default="dental1", cast=str),
-        "USER": config("DB_USER", default="postgres", cast=str),
-        "PASSWORD": config("DB_PASSWORD", default="poonhill", cast=str),
-        "PORT": config("DB_PORT", default="5432", cast=int),
-        "HOST": config("DB_HOST", default="localhost", cast=str),
+        'ENGINE': config("DB_ENGINE", default="django_tenants.postgresql_backend"),
+        "NAME": config("DB_NAME", default="dental_3if4"),
+        "USER": config("DB_USER", default="dental_user"),
+        "PASSWORD": config("DB_PASSWORD", default="xoMyGx0EBCCJG9DfZ9ldvKazmeYBh7a8"),
+        "PORT": config("DB_PORT", default=5432, cast=int),
+        "HOST": config("DB_HOST", default="dpg-cu33usaj1k6c73a1eb7g-a.singapore-postgres.render.com"),
     }
 }
-
 
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
@@ -154,11 +156,12 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 
-CORS_ALLOWED_ORIGINS = ()
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins
 
 CORS_ALLOW_METHODS = (
     "DELETE",

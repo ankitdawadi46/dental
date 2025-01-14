@@ -31,7 +31,6 @@ class CustomUserSerializer(ModelSerializer):
     def create(self, validated_data):
         user_creator = UserCreator()
         password = get_random_string(10)
-        import ipdb; ipdb.set_trace()
         user = user_creator.create_user(
             email=validated_data.get("email"),
             first_name=validated_data.get("first_name"),
@@ -42,7 +41,6 @@ class CustomUserSerializer(ModelSerializer):
         )
         return user
         
-
 
 class ProfileSerializer(ModelSerializer):
     class Meta:

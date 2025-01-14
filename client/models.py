@@ -102,7 +102,7 @@ class AuditFields(models.Model):
             super().delete()
 
 
-class Client(TenantMixin):
+class Client(TenantMixin, AuditFields):
     name = models.CharField(max_length=1024, verbose_name="business name")
     paid_until = models.DateTimeField(null=True, blank=True)
     contact_number = models.CharField(null=True, blank=True, max_length=20)
