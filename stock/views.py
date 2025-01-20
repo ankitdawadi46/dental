@@ -18,6 +18,7 @@ class StockViewSet(viewsets.ModelViewSet):
 
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
+    permission_classes = [AllowAny]
 
     def update_stock_quantity(self, stock, transaction_type, quantity):
         """
@@ -55,7 +56,7 @@ class StockViewSet(viewsets.ModelViewSet):
             # stock.quantity_available = F("quantity_available") + reorder_quantity
             # stock.save()
 
-    @with_tenant_context
+    # @with_tenant_context
     @atomic_transaction
     def partial_update(self, request, *args, **kwargs):
         """
@@ -98,7 +99,7 @@ class StockTransactionViewSet(viewsets.ModelViewSet):
     serializer_class = StockTransactionSerializer
     permission_classes = [AllowAny]
 
-    @with_tenant_context
+    # @with_tenant_context
     @atomic_transaction
     def create(self, request, *args, **kwargs):
         """
@@ -152,7 +153,7 @@ class StockTransactionViewSet(viewsets.ModelViewSet):
         """
         serializer.save(transaction_date=now())
 
-    @with_tenant_context
+    # @with_tenant_context
     @atomic_transaction
     def update(self, request, *args, **kwargs):
         """
@@ -196,7 +197,7 @@ class StockTransactionViewSet(viewsets.ModelViewSet):
         except ValidationError as e:
             return BaseResponse(data={"detail": str(e)}, status=400)
 
-    @with_tenant_context
+    # @with_tenant_context
     @atomic_transaction
     def destroy(self, request, *args, **kwargs):
         """

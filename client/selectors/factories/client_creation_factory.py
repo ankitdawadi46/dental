@@ -30,7 +30,6 @@ class ClientCreationFactory(IClientCreationFactory):
 
         # Step 4: Create user for the client
         password = get_random_string(10)
-        import ipdb; ipdb.set_trace()
         self.user_creator().create_user(client, password)
 
         return client  # or return both client and user, as needed

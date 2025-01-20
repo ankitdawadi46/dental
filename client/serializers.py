@@ -58,8 +58,24 @@ class ProfileSerializer(ModelSerializer):
             "nhpc_no",
         ]
 
+class ProfileGetSerializer(ModelSerializer):
+    user = CustomUserSerializer()
+    
+    class Meta:
+        model = Profile
+        fields = "__all__"
 
-class ClinicProfileSerializer(ModelSerializer):
+
+class ClinicProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = ClinicProfile
-        fields = ["clinic", "user"]
+        fields = ['id', 'clinic', 'user']
+        
+
+class ClinicProfileGetSerializer(serializers.ModelSerializer):
+    user = ProfileGetSerializer()
+    
+    class Meta:
+        model = ClinicProfile
+        fields = "__all__"

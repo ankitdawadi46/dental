@@ -23,21 +23,21 @@ class LeaveTypeViewSet(viewsets.ModelViewSet):
     serializer_class = LeaveTypeSerializer
     permission_classes = [AllowAny]
 
-    @with_tenant_context
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+    # @with_tenant_context
+    # def update(self, request, *args, **kwargs):
+    #     return super().update(request, *args, **kwargs)
 
-    @with_tenant_context
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+    # # @with_tenant_context
+    # def list(self, request, *args, **kwargs):
+    #     return super().list(request, *args, **kwargs)
 
-    @with_tenant_context
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+    # @with_tenant_context
+    # def retrieve(self, request, *args, **kwargs):
+    #     return super().retrieve(request, *args, **kwargs)
 
-    @with_tenant_context
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+    # @with_tenant_context
+    # def create(self, request, *args, **kwargs):
+    #     return super().create(request, *args, **kwargs)
 
 
 class EmployeeLeaveViewSet(viewsets.ModelViewSet):
@@ -59,7 +59,7 @@ class EmployeeLeaveViewSet(viewsets.ModelViewSet):
             return [IsAdminUser()]
         return [IsAuthenticated()]
     
-    @with_tenant_context
+    # @with_tenant_context
     def create(self, request, *args, **kwargs):
         data = request.data
 
@@ -109,7 +109,7 @@ class EmployeeLeaveViewSet(viewsets.ModelViewSet):
         serializer = EmployeeLeaveSerializer(leave_request)
         return BaseResponse(data=serializer.data, status=201)
     
-    @with_tenant_context
+    # @with_tenant_context
     def partial_update(self, request, *args, **kwargs):
         leave_id = kwargs.get(self.lookup_url_kwarg)  # Extract leave_id from URL parameters
 
@@ -139,7 +139,7 @@ class EmployeeLeaveViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(leave_request)
         return BaseResponse(data=serializer.data, status=200)
 
-    @with_tenant_context
+    # @with_tenant_context
     def update(self, request, *args, **kwargs):
         leave_id = kwargs.get(
             self.lookup_url_kwarg
@@ -220,7 +220,7 @@ class EmployeeLeaveViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(leave_request)
         return BaseResponse(data=serializer.data, status=200)
     
-    @with_tenant_context
+    # @with_tenant_context
     def list(self, request, *args, **kwargs):
         """
         Retrieve all leave requests for the currently authenticated employee.
@@ -242,7 +242,7 @@ class EmployeeLeaveViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return BaseResponse(data=serializer.data, status=200)
         
-    @with_tenant_context
+    # @with_tenant_context
     def retrieve(self, request, *args, **kwargs):
         employee_id = kwargs.get(self.lookup_url_kwarg, None)
         """

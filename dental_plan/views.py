@@ -1,33 +1,24 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from client.utils import atomic_transaction, with_tenant_context
+from client.utils import atomic_transaction
 from dental_app.utils.response import BaseResponse
-from dental_plan.selectors.factories.dental_data_factory import DentalDataFactory
-from dental_plan.selectors.factories.patient_full_dental_history import (
-    DentalHistoryFactory,
-)
-
 from dental_plan.models import (
+    CompanyTreatmentProcedures,
     Condition,
-    DentalHistory,
     PatientCondition,
-    PatientTreatment,
-    Payment,
     Treatment,
     TreatmentMaterialUsed,
 )
+from dental_plan.selectors.factories.treatment_procedure_factory import TreatmentProcedureFactory
 from dental_plan.serializers import (
+    CompanyTreatmentProceduresSerializer,
     ConditionSerializer,
-    DentalHistoryPostSerializer,
-    DentalHistorySerializer,
     PatientConditionSerializer,
-    PatientTreatmentSerializer,
-    PaymentSerializer,
     TreatmentMaterialsUsedSerializer,
     TreatmentSerializer,
 )
@@ -36,7 +27,7 @@ from dental_plan.serializers import (
 class TenantConditionTreatmentView(APIView):
     permission_classes = [AllowAny]
 
-    @with_tenant_context
+    # @with_tenant_context
     @atomic_transaction
     def get(self, request, tenant_schema_name):
         conditions = Condition.objects.all()
@@ -53,7 +44,7 @@ class TenantConditionTreatmentView(APIView):
             }
         )
 
-    @with_tenant_context
+    # @with_tenant_context
     @atomic_transaction
     def post(self, request, tenant_schema_name):
         # Deserialize and create Condition
@@ -88,51 +79,51 @@ class PatientConditionViewSet(viewsets.ModelViewSet):
     serializer_class = PatientConditionSerializer
 
 
-class PatientTreatmentViewSet(viewsets.ModelViewSet):
-    queryset = PatientTreatment.objects.all()
-    serializer_class = PatientTreatmentSerializer
-    
+# class PatientTreatmentViewSet(viewsets.ModelViewSet):
+#     queryset = PatientTreatment.objects.all()
+#     serializer_class = PatientTreatmentSerializer
 
-class PaymentViewset(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-    permission_classes = [AllowAny]
-    
-    @with_tenant_context
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    @with_tenant_context
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-    
-    @with_tenant_context
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-    
-    @with_tenant_context
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
-    
+
+# class PaymentViewset(viewsets.ModelViewSet):
+#     queryset = Payment.objects.all()
+#     serializer_class = PaymentSerializer
+#     permission_classes = [AllowAny]
+
+# @with_tenant_context
+# def list(self, request, *args, **kwargs):
+#     return super().list(request, *args, **kwargs)
+
+# @with_tenant_context
+# def create(self, request, *args, **kwargs):
+#     return super().create(request, *args, **kwargs)
+
+# @with_tenant_context
+# def update(self, request, *args, **kwargs):
+#     return super().update(request, *args, **kwargs)
+
+# @with_tenant_context
+# def destroy(self, request, *args, **kwargs):
+#     return super().destroy(request, *args, **kwargs)
+
 
 class TreatmentMaterialUsedViewset(viewsets.ModelViewSet):
     queryset = TreatmentMaterialUsed.objects.all()
     serializer_class = TreatmentMaterialsUsedSerializer
     permission_classes = [AllowAny]
-    
-    @with_tenant_context
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    @with_tenant_context
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-    
-    @with_tenant_context
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-    
-    @with_tenant_context
+
+    # # @with_tenant_context
+    # def list(self, request, *args, **kwargs):
+    #     return super().list(request, *args, **kwargs)
+
+    # # @with_tenant_context
+    # def create(self, request, *args, **kwargs):
+    #     return super().create(request, *args, **kwargs)
+
+    # # @with_tenant_context
+    # def update(self, request, *args, **kwargs):
+    #     return super().update(request, *args, **kwargs)
+
+    # @with_tenant_context
     def destroy(self, request, *args, **kwargs):
         # Retrieve the object safely
         instance = self.get_object_or_404_instance(kwargs)
@@ -141,9 +132,7 @@ class TreatmentMaterialUsedViewset(viewsets.ModelViewSet):
         self.perform_destroy(instance)
 
         # Return a success response
-        return BaseResponse(
-            data={"detail": "Object deleted successfully."},
-            status=204)
+        return BaseResponse(data={"detail": "Object deleted successfully."}, status=204)
 
     def perform_destroy(self, instance):
         """
@@ -169,97 +158,131 @@ class TreatmentMaterialUsedViewset(viewsets.ModelViewSet):
         return obj
 
 
-class DentalHistoryViewSet(viewsets.ModelViewSet):
-    queryset = DentalHistory.objects.all()
-    serializer_class = DentalHistoryPostSerializer
+# class DentalHistoryViewSet(viewsets.ModelViewSet):
+#     queryset = DentalHistory.objects.all()
+#     serializer_class = DentalHistoryPostSerializer
+#     permission_classes = [AllowAny]
+
+#     # @with_tenant_context
+#     @atomic_transaction
+#     def create(self, request, tenant_schema_name, *args, **kwargs):
+#         data = request.data
+
+#         try:
+#             # Delegate to the coordinator
+#             result = DentalHistoryFactory.create_full_dental_history(data)
+
+#             # Serialize the response
+#             dental_history_serializer = self.get_serializer(result["dental_history"])
+#             patient_condition_serializer = PatientConditionSerializer(
+#                 result["patient_condition"]
+#             )
+#             patient_treatment_serializer = PatientTreatmentSerializer(
+#                 result["patient_treatment"]
+#             )
+
+#             return BaseResponse(
+#                 data={
+#                     "dental_history": dental_history_serializer.data,
+#                     "patient_condition": patient_condition_serializer.data,
+#                     "patient_treatment": patient_treatment_serializer.data,
+#                 },
+#                 status=201,
+#             )
+
+#         except ObjectDoesNotExist as e:
+#             return BaseResponse(data={"error": str(e)}, status=400)
+#         except Exception as e:
+#             return BaseResponse(
+#                 data={"error": "An unexpected error occurred", "details": str(e)},
+#                 status=500,
+#             )
+
+#     # @with_tenant_context
+#     @atomic_transaction
+#     def list(self, request, *args, **kwargs):
+#         patient_id = request.query_params.get("patient_id")
+#         dental_structure_id = request.query_params.get("dental_structure_id")
+
+#         if not patient_id or not dental_structure_id:
+#             return BaseResponse(
+#                 data={"error": "patient_id and dental_structure_id are required."},
+#                 status=400,
+#             )
+
+#         # Use factories to fetch data
+#         dental_history_factory = DentalDataFactory.get_dental_history_factory()
+#         condition_factory = DentalDataFactory.get_condition_factory()
+#         treatment_factory = DentalDataFactory.get_treatment_factory()
+#         payment_factory = DentalDataFactory.get_payment_factory()
+
+#         dental_histories = dental_history_factory.dental_history_data(
+#             patient_id, dental_structure_id
+#         )
+
+#         if not dental_histories.exists():
+#             return BaseResponse(
+#                 data={
+#                     "error": "No data found for the given patient and dental structure."
+#                 },
+#                 status=404,
+#             )
+
+#         # Serialize the dental histories
+#         dental_history_serializer = DentalHistorySerializer(dental_histories, many=True)
+#         # Fetch related conditions and treatments for patient data
+#         condition_ids = dental_histories.values_list("condition__id", flat=True)
+#         treatment_ids = dental_histories.values_list("treatment__id", flat=True)
+
+#         conditions = condition_factory.get_conditions(condition_ids)
+#         treatments = treatment_factory.get_treatments(treatment_ids)
+#         payments = payment_factory.get_payments(treatment_ids)
+
+#         # Serialize patient conditions and treatments with nested data
+#         patient_condition_serializer = PatientConditionSerializer(conditions, many=True)
+#         patient_treatment_serializer = PatientTreatmentSerializer(treatments, many=True)
+#         payments = PaymentSerializer(payments, many=True)
+
+#         return BaseResponse(
+#             data={
+#                 "dental_histories": dental_history_serializer.data,
+#                 "patient_conditions": patient_condition_serializer.data,
+#                 "patient_treatments": patient_treatment_serializer.data,
+#                 "payments": payments.data
+#             },
+#             status=200,
+#         )
+
+class CompanyTreatmentProceduresViewset(viewsets.ModelViewSet):
+    queryset = CompanyTreatmentProcedures.objects.all()
+    serializer_class = CompanyTreatmentProceduresSerializer
     permission_classes = [AllowAny]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.factory = TreatmentProcedureFactory()
 
-    @with_tenant_context
-    @atomic_transaction
-    def create(self, request, tenant_schema_name, *args, **kwargs):
-        data = request.data
-
-        try:
-            # Delegate to the coordinator
-            result = DentalHistoryFactory.create_full_dental_history(data)
-
-            # Serialize the response
-            dental_history_serializer = self.get_serializer(result["dental_history"])
-            patient_condition_serializer = PatientConditionSerializer(
-                result["patient_condition"]
-            )
-            patient_treatment_serializer = PatientTreatmentSerializer(
-                result["patient_treatment"]
-            )
-
-            return BaseResponse(
-                data={
-                    "dental_history": dental_history_serializer.data,
-                    "patient_condition": patient_condition_serializer.data,
-                    "patient_treatment": patient_treatment_serializer.data,
-                },
-                status=201,
-            )
-
-        except ObjectDoesNotExist as e:
-            return BaseResponse(data={"error": str(e)}, status=400)
-        except Exception as e:
-            return BaseResponse(
-                data={"error": "An unexpected error occurred", "details": str(e)},
-                status=500,
-            )
-
-    @with_tenant_context
-    @atomic_transaction
-    def list(self, request, *args, **kwargs):
-        patient_id = request.query_params.get("patient_id")
-        dental_structure_id = request.query_params.get("dental_structure_id")
-
-        if not patient_id or not dental_structure_id:
-            return BaseResponse(
-                data={"error": "patient_id and dental_structure_id are required."},
-                status=400,
-            )
-
-        # Use factories to fetch data
-        dental_history_factory = DentalDataFactory.get_dental_history_factory()
-        condition_factory = DentalDataFactory.get_condition_factory()
-        treatment_factory = DentalDataFactory.get_treatment_factory()
-        payment_factory = DentalDataFactory.get_payment_factory()
-
-        dental_histories = dental_history_factory.dental_history_data(
-            patient_id, dental_structure_id
-        )
-
-        if not dental_histories.exists():
-            return BaseResponse(
-                data={
-                    "error": "No data found for the given patient and dental structure."
-                },
-                status=404,
-            )
-
-        # Serialize the dental histories
-        dental_history_serializer = DentalHistorySerializer(dental_histories, many=True)
-        # Fetch related conditions and treatments for patient data
-        condition_ids = dental_histories.values_list("condition__id", flat=True)
-        treatment_ids = dental_histories.values_list("treatment__id", flat=True)
-
-        conditions = condition_factory.get_conditions(condition_ids)
-        treatments = treatment_factory.get_treatments(treatment_ids)
-        payments = payment_factory.get_payments(treatment_ids)
-
-        # Serialize patient conditions and treatments with nested data
-        patient_condition_serializer = PatientConditionSerializer(conditions, many=True)
-        patient_treatment_serializer = PatientTreatmentSerializer(treatments, many=True)
-        payments = PaymentSerializer(payments, many=True)
-        
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # Delegate creation to the factory
+        company_treatment_procedure = self.factory.create(serializer.validated_data)
+        response_serializer = self.get_serializer(company_treatment_procedure)
         return BaseResponse(
-            data={
-                "dental_histories": dental_history_serializer.data,
-                "patient_conditions": patient_condition_serializer.data,
-                "patient_treatments": patient_treatment_serializer.data,
-                "payments": payments.data
-            },
-            status=200,
-        )
+            data=response_serializer.data,
+            status=201)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Delegate update to the factory
+        company_treatment_procedure = self.factory.update(instance, serializer.validated_data)
+        response_serializer = self.get_serializer(company_treatment_procedure)
+        return BaseResponse(
+            data=response_serializer.data,
+            status=200)
+    
+        
+        

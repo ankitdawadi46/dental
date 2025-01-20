@@ -2,8 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from dental_plan.views import (
-    DentalHistoryViewSet,
-    PaymentViewset,
+    CompanyTreatmentProceduresViewset,
     TenantConditionTreatmentView,
     TreatmentMaterialUsedViewset,
 )
@@ -12,14 +11,19 @@ routers = DefaultRouter()
 
 app_name = "dental_plan"
 
+# routers.register(
+#     r"dental-history/(?P<tenant_schema_name>[^/.]+)",
+#     DentalHistoryViewSet,
+#     basename="dental_history",
+# )
 routers.register(
-    r"dental-history/(?P<tenant_schema_name>[^/.]+)",
-    DentalHistoryViewSet,
-    basename="dental_history",
+    r"company-treatment-plans",
+    CompanyTreatmentProceduresViewset,
+    basename="company_treatment_procedures",
 )
-routers.register(
-    r"payment/(?P<tenant_schema_name>[^/.]+)", PaymentViewset, basename="payment"
-)
+# routers.register(
+#     r"payment/(?P<tenant_schema_name>[^/.]+)", PaymentViewset, basename="payment"
+# )
 routers.register(
     r"material-used/(?P<tenant_schema_name>[^/.]+)",
     TreatmentMaterialUsedViewset,

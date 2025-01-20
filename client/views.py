@@ -9,12 +9,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 # from dateutil.relativedelta import relativedelta
 from client.filter import ClientFilter
-from client.models import Client, Domain, Profile
+from client.models import Client, ClinicProfile, Domain, Profile
 from client.selectors.factories.client_creation_factory import ClientCreationFactory
 from client.selectors.factories.client_support_user import ClientSupportUserFactory
 from client.selectors.factories.dashboard_data_factory import DashboardDataFactory
 from client.serializers import (
     ClientSerializer,
+    ClinicProfileGetSerializer,
     ClinicProfileSerializer,
     CustomUserSerializer,
     DashboardSerializer,
@@ -247,7 +248,34 @@ class DomainViewSet(ModelViewSet):
         domain = self.get_object()
         domain.delete()
         return BaseResponse(data={"message": "Domain Deleted Successfully"}, status=200)
-
+    
+    
+class ClinicProfileViewset(ModelViewSet):
+    queryset = ClinicProfile.objects.all()
+    serializer_class = ClinicProfileGetSerializer
+    permission_classes = [IsAuthenticated]
+    
+    @action(detail=False, methods=["get"], url_path="users")
+    def get_profile_by_type(self, request):
+        profile_type = request.query_params.get("profile_type", None)
+        clinic = request.query_params.get('clinic')
+        if not profile_type:
+            return BaseResponse(
+                data={"error": "profile_type query parameter is required."},
+                status=400)
+        if not clinic:
+            return BaseResponse(
+                {"error": "clinic query parameter is required."},
+                status=400)
+        queryset = self.get_queryset().select_related("user__user", "clinic").filter(
+            user__profile_type=profile_type,
+            clinic__id=clinic
+            )
+        serializer = self.get_serializer(queryset, many=True)
+        return BaseResponse(
+            data=serializer.data,
+            status=200)
+     
 
 # #############################################################################################
 # # Payment CRUD

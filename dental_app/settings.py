@@ -112,11 +112,11 @@ WSGI_APPLICATION = 'dental_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': config("DB_ENGINE", default="django_tenants.postgresql_backend"),
-        "NAME": config("DB_NAME", default="dental_3if4"),
-        "USER": config("DB_USER", default="dental_user"),
-        "PASSWORD": config("DB_PASSWORD", default="xoMyGx0EBCCJG9DfZ9ldvKazmeYBh7a8"),
+        "NAME": config("DB_NAME", default="dental2"),
+        "USER": config("DB_USER", default="postgres"),
+        "PASSWORD": config("DB_PASSWORD", default="poonhill"),
         "PORT": config("DB_PORT", default=5432, cast=int),
-        "HOST": config("DB_HOST", default="dpg-cu33usaj1k6c73a1eb7g-a.singapore-postgres.render.com"),
+        "HOST": config("DB_HOST", default="localhost"),
     }
 }
 

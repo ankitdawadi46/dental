@@ -36,6 +36,26 @@ class ITreatmentSelector(ABC):
     def get_treatments(self):
         pass
 
+    
+class ISessionService(ABC):
+    @abstractmethod
+    def create_sessions(self):
+        pass
+    
+    @abstractmethod
+    def update_sessions(self):
+        pass
+    
+
+class IMaterialService(ABC):
+    @abstractmethod
+    def create_materials(self):
+        pass
+    
+    @abstractmethod
+    def update_materials(self):
+        pass
+     
 
 class IPatientDentalHistoryFactory(ABC):
     @abstractmethod
@@ -54,6 +74,18 @@ class IDentalHistoryDataFactory(ABC):
 
     @abstractmethod
     def get_dental_history_factory():
+        pass
+    
+
+class ITreatmentProcedureFactory(ABC):
+    @abstractmethod
+    def create(self, validated_data):
+        """Abstract method for creating an entity."""
+        pass
+
+    @abstractmethod
+    def update(self, instance, validated_data):
+        """Abstract method for updating an entity."""
         pass
     
 

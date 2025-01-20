@@ -10,15 +10,15 @@ class LabServiceViewSet(viewsets.ModelViewSet):
     serializer_class = LabServiceSerializer
     permission_classes = [IsAuthenticated]
     
-    @with_tenant_context
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+    # @with_tenant_context
+    # def create(self, request, *args, **kwargs):
+    #     return super().create(request, *args, **kwargs)
     
-    @with_tenant_context
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+    # @with_tenant_context
+    # def update(self, request, *args, **kwargs):
+    #     return super().update(request, *args, **kwargs)
     
-    @with_tenant_context
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+    # @with_tenant_context
+    # def list(self, request, *args, **kwargs):
+    #     return super().list(request, *args, **kwargs)
 

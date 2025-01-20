@@ -6,7 +6,7 @@ app_name = 'leave'
 
 router = DefaultRouter()
 router.register(r'leave-types/(?P<tenant_schema_name>[^/.]+)', LeaveTypeViewSet, basename='leave-type')
-router.register(r'employee-leaves/(?P<tenant_schema_name>[^/.]+)', EmployeeLeaveViewSet, basename='employee-leave')
+router.register(r'employee-leaves', EmployeeLeaveViewSet, basename='employee-leave')
 
 urlpatterns = [
     path('', include(router.urls)),

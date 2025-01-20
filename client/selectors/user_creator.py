@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django_tenants.utils import tenant_context
+from django_tenants.utils import schema_context
 
 from client.domains import ICreateClientUser
 from client.models import Client
@@ -19,14 +19,15 @@ class ClientUserCreator(ICreateClientUser):
         self.site_configurator = SiteConfigurator
 
     def create_user(self, client: Client, password: str) -> User:
+        with schema_context('public'):
             # Create the user
-        email = client.email
-        user = self.user_creator().create_user(email, password, is_staff=True)
+            email = client.email
+            user = self.user_creator().create_user(email, password, is_staff=True)
 
-            # Add user to SuperAdmin group
-        self.group_manager().add_user_to_group(user, "SuperAdmin")
+                # Add user to SuperAdmin group
+            self.group_manager().add_user_to_group(user, "SuperAdmin")
 
-            # Configure the site
-        self.site_configurator().configure_site(client.primary_domain_name)
+                # Configure the site
+            self.site_configurator().configure_site(client.primary_domain_name)
 
-        return user
+            return user

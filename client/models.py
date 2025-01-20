@@ -229,7 +229,8 @@ class Profile(AuditFields):
         ("Doctor", "Doctor"),
         ("Intern", "Intern"),
         ("Helper", "Helper"),
-        ("Client", "Client")
+        ("Client", "Client"),
+        ("User", "User")
     )
     gender = (
         ("Male", "Male"),

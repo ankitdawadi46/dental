@@ -50,7 +50,7 @@ class OfficeHolidayViewSet(viewsets.ModelViewSet):
     queryset = OfficeHoliday.objects.all()
     serializer_class = OfficeHolidaySerializer
 
-    @with_tenant_context
+    # @with_tenant_context
     @action(
         detail=False,
         methods=["post"],

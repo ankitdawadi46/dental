@@ -20,14 +20,14 @@ class NoticeViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at", "updated_at"]  # Allow ordering by creation/update time
     ordering = ["-created_at"]  # Default ordering by newest first
     
-    @with_tenant_context
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+    # @with_tenant_context
+    # def create(self, request, *args, **kwargs):
+    #     return super().create(request, *args, **kwargs)
     
-    @with_tenant_context
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+    # @with_tenant_context
+    # def list(self, request, *args, **kwargs):
+    #     return super().list(request, *args, **kwargs)
     
-    @with_tenant_context
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+    # @with_tenant_context
+    # def retrieve(self, request, *args, **kwargs):
+    #     return super().retrieve(request, *args, **kwargs)

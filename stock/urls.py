@@ -7,10 +7,10 @@ app_name = "stock"
 
 router = DefaultRouter()
 router.register(
-    r"stock/(?P<tenant_schema_name>[^/.]+)", StockViewSet, basename="stock"
+    r"stock", StockViewSet, basename="stock"
 )
 router.register(
-    r"stock-transaction/(?P<tenant_schema_name>[^/.]+)",
+    r"stock-transaction",
     StockTransactionViewSet,
     basename="stock_transaction",
 )

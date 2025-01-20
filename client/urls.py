@@ -8,6 +8,7 @@ router = DefaultRouter()
 
 router.register(r"dashboard", views.DashboardViewSet, "dashboard")
 router.register(r"clients", views.ClientViewSet, "clients")
+router.register(r"clinic-profile", views.ClinicProfileViewset, "client-profile")
 
 urlpatterns = [
     # path("", views.DashboardView.as_view(), name="index"),
