@@ -1,18 +1,20 @@
 # import subprocess
+from django.db import connection
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
 
 # from dateutil.relativedelta import relativedelta
 from client.filter import ClientFilter
-from client.models import Client, ClinicProfile, Domain, Profile
+from client.models import Client, ClinicProfile, CustomUser, Domain, Profile
 from client.selectors.factories.client_creation_factory import ClientCreationFactory
 from client.selectors.factories.client_support_user import ClientSupportUserFactory
 from client.selectors.factories.dashboard_data_factory import DashboardDataFactory
+from client.selectors.factories.user_creation_factory import UserCreationFactory
 from client.serializers import (
     ClientSerializer,
     ClinicProfileGetSerializer,
@@ -22,8 +24,10 @@ from client.serializers import (
     DomainSerializer,
     ProfileSerializer,
 )
+from dental_app.utils.mixins import PaginationMixin, SearchMixin
 from dental_app.utils.pagination import CustomPagination
 from dental_app.utils.response import BaseResponse
+
 
 class DashboardViewSet(ModelViewSet):
     permission_classes = [AllowAny]
@@ -56,7 +60,7 @@ class ClientViewSet(ModelViewSet):
     pagination_class = CustomPagination
     filterset_class = ClientFilter
     filter_backends = [DjangoFilterBackend, SearchFilter]  # Add SearchFilter
-    search_fields = ['name', 'email']  # Adjust fields as per your model
+    search_fields = ["name", "email"]  # Adjust fields as per your model
 
     def perform_create(self, serializer):
         try:
@@ -115,82 +119,127 @@ class ClientViewSet(ModelViewSet):
     @action(
         detail=False,
         methods=["post"],
-        permission_classes=[IsAuthenticated],
+        permission_classes=[AllowAny],
         url_path="create-user",
     )
     def create_user(self, request: Request):
-        data = request.data
-        if data.get("profile_type") == "Doctor" and not data.get("nmc_no"):
-            return BaseResponse(message="NMC Number is required for Doctor", status=400)
-        if data.get("profile_type") == "Helper" and not data.get("nhpc_no"):
-            return BaseResponse(
-                message="NHPC Number is required for Helper", status=400
+        factory = UserCreationFactory()
+        try:
+            data = request.data
+            factory.user_service.validate_profile_type(data)
+            user_data = {
+                "email": data.get("email"),
+                "first_name": data.get("first_name"),
+                "middle_name": data.get("middle_name"),
+                "last_name": data.get("last_name"),
+            }
+            profile_data = {
+                "photo": data.get("photo"),
+                "dob": data.get("dob"),
+                "gender": data.get("gender"),
+                "profile_type": data.get("profile_type"),
+                "designation": data.get("designation"),
+                "address": data.get("address"),
+                "phone_number": data.get("phone_number"),
+                "nmc_no": data.get("nmc_no"),
+                "nhpc_no": data.get("nhpc_no"),
+            }
+            clinic_data = {"clinic": data.get("clinic")}
+            is_clinic_data = (
+                ClinicProfile.objects.select_related("clinic", "user")
+                .filter(clinic__id=data.get("clinic"), user__user__email=data.get("email"))
+                .exists()
             )
-        user_data = {
-            "email": data.get("email"),
-            "first_name": data.get("first_name"),
-            "middle_name": data.get("middle_name"),
-            "last_name": data.get("last_name"),
-        }
-        profile_data = {
-            "photo": data.get("photo"),
-            "dob": data.get("dob"),
-            "gender": data.get("gender"),
-            "profile_type": data.get("profile_type"),
-            "designation": data.get("designation"),
-            "address": data.get("address"),
-            "phone_number": data.get("phone_number"),
-            "nmc_no": data.get("nmc_no"),
-            "nhpc_no": data.get("nhpc_no"),
-        }
-        clinic_profile_data = {"clinic": data.get("clinic")}
-        user_serializer = CustomUserSerializer(data=user_data)
-        if not user_serializer.is_valid():
-            return BaseResponse(
-                data={"message": "Invalid user data", "errors": user_serializer.errors},
-                status=400,
-            )
-        user = user_serializer.save()
-
-        profile_data["user"] = user.id
-        profile_serializer = ProfileSerializer(data=profile_data)
-        if not profile_serializer.is_valid():
-            return BaseResponse(
-                data={
-                    "message": "Invalid profile data",
-                    "errors": profile_serializer.errors,
-                },
-                status=400,
-            )
-        profile = profile_serializer.save()
-
-        # Validate and create ClinicProfile (if applicable)
-        if clinic_profile_data.get("clinic"):
-            clinic_profile_data["user"] = profile.id
-            clinic_profile_serializer = ClinicProfileSerializer(
-                data=clinic_profile_data
-            )
-            if not clinic_profile_serializer.is_valid():
+            if is_clinic_data:
                 return BaseResponse(
-                    data={
-                        "message": "Invalid clinic profile data",
-                        "errors": clinic_profile_serializer.errors,
-                    },
+                    message="Invalid user data",
+                    data={"User already exists"},
                     status=400,
                 )
-            clinic_profile_serializer.save()
+             # Create user and profile
+            user = factory.user_service.get_or_create_user(user_data)
+            profile_data["user"] = user.id
+            profile = factory.profile_service.create_profile(profile_data)
 
-        return BaseResponse(
-            {"message": "User, profile, and clinic profile created successfully"},
-            status=201,
-        )
-       
-    def partial_update(self, request, *args, **kwargs):
-        if request.data.get('schema_name'):
+            # Create clinic profile if applicable
+            if clinic_data["clinic"]:
+                factory.clinic_profile_service.handle_clinic_profile(profile, clinic_data)
+
             return BaseResponse(
-                data={'Cannot update schema name.'},
-                status=400
+                {"message": "User, profile, and clinic profile created successfully"},
+                status=201,
             )
+
+        except ValueError as e:
+            return BaseResponse(
+                {"message": "Invalid data", "errors": str(e)}, status=400
+            )
+        
+    @action(
+    detail=True,
+    methods=["PATCH"],
+    permission_classes=[AllowAny],
+    url_path="update-user",
+)
+    def update_user(self, request: Request, pk: int):
+        factory = UserCreationFactory()
+        try:
+            data = request.data
+            user = ClinicProfile.objects.select_related('user__user').filter(id=pk).first().user.user
+
+            if not user:
+                return BaseResponse(message="User not found", status=404)
+
+            # Validate profile type
+            factory.user_service.validate_profile_type(data)
+            # Update user data
+            user_data = {
+                "email": data.get("email"),
+                "first_name": data.get("first_name"),
+                "middle_name": data.get("middle_name"),
+                "last_name": data.get("last_name"),
+            }
+            user = factory.user_service.get_or_create_user(user_data)
+            # Update user data
+            user = factory.user_service.update_user(user, user_data)
+
+            # Update profile
+            profile = Profile.objects.filter(user=user).first()
+            if not profile:
+                return BaseResponse(message="Profile not found", status=404)
+
+            profile_data = {
+                "photo": data.get("photo"),
+                "dob": data.get("dob"),
+                "gender": data.get("gender"),
+                "profile_type": data.get("profile_type"),
+                "designation": data.get("designation"),
+                "address": data.get("address"),
+                "phone_number": data.get("phone_number"),
+                "nmc_no": data.get("nmc_no"),
+                "nhpc_no": data.get("nhpc_no"),
+            }
+            factory.profile_service.update_profile(profile, profile_data)
+
+            # Update clinic profile if applicable
+            if data.get("clinic"):
+                clinic_data = {"clinic": data.get("clinic")}
+                self.factory.clinic_profile_service.handle_clinic_profile(profile, clinic_data)
+
+            return BaseResponse(
+                {"message": "User, profile, and clinic profile updated successfully"},
+                status=200,
+            )
+
+        except ValueError as e:
+            return BaseResponse(
+                {"message": "Invalid data", "errors": str(e)}, status=400
+            )
+
+
+    def partial_update(self, request, *args, **kwargs):
+        if request.data.get("schema_name"):
+            return BaseResponse(data={"Cannot update schema name."}, status=400)
         return super().partial_update(request, *args, **kwargs)
 
 
@@ -248,34 +297,46 @@ class DomainViewSet(ModelViewSet):
         domain = self.get_object()
         domain.delete()
         return BaseResponse(data={"message": "Domain Deleted Successfully"}, status=200)
-    
-    
-class ClinicProfileViewset(ModelViewSet):
+
+
+class ClinicProfileViewset(ModelViewSet, SearchMixin, PaginationMixin):
     queryset = ClinicProfile.objects.all()
     serializer_class = ClinicProfileGetSerializer
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = [AllowAny]
+    pagination_class = CustomPagination  # Use the custom pagination class
+    filter_backends = [SearchFilter]  # Enable search functionality
+    search_fields = [
+        "user__user__email",
+        "user__designation",
+        "user__phone_number",
+    ]  # Define searchable fields
+
     @action(detail=False, methods=["get"], url_path="users")
     def get_profile_by_type(self, request):
         profile_type = request.query_params.get("profile_type", None)
-        clinic = request.query_params.get('clinic')
+        clinic = request.query_params.get("clinic")
         if not profile_type:
             return BaseResponse(
-                data={"error": "profile_type query parameter is required."},
-                status=400)
+                data={"error": "profile_type query parameter is required."}, status=400
+            )
         if not clinic:
             return BaseResponse(
-                {"error": "clinic query parameter is required."},
-                status=400)
-        queryset = self.get_queryset().select_related("user__user", "clinic").filter(
-            user__profile_type=profile_type,
-            clinic__id=clinic
+                {"error": "clinic query parameter is required."}, status=400
             )
-        serializer = self.get_serializer(queryset, many=True)
-        return BaseResponse(
-            data=serializer.data,
-            status=200)
-     
+
+        # Filter queryset
+        queryset = (
+            self.get_queryset()
+            .select_related("user__user", "clinic")
+            .filter(user__profile_type=profile_type, clinic__id=clinic)
+        )
+        # Apply search using the SearchMixin
+        search_query = request.query_params.get("search", None)
+        queryset = self.apply_search(queryset, search_query)
+
+        # Paginate and serialize using the PaginationMixin
+        return self.paginate_and_serialize(queryset, self.get_serializer_class())
+
 
 # #############################################################################################
 # # Payment CRUD

@@ -1,82 +1,75 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from client.utils import atomic_transaction
 from dental_app.utils.response import BaseResponse
 from dental_plan.models import (
     CompanyTreatmentProcedures,
-    Condition,
-    PatientCondition,
-    Treatment,
     TreatmentMaterialUsed,
+    CompanyDiagnosticProcedures
 )
-from dental_plan.selectors.factories.treatment_procedure_factory import TreatmentProcedureFactory
+from dental_plan.selectors.factories.treatment_procedure_factory import (
+    TreatmentProcedureFactory,
+)
 from dental_plan.serializers import (
     CompanyTreatmentProceduresSerializer,
-    ConditionSerializer,
-    PatientConditionSerializer,
     TreatmentMaterialsUsedSerializer,
-    TreatmentSerializer,
+    CompanyDiagnosticProceduresSerializer
 )
 
+# class TenantConditionTreatmentView(APIView):
+#     permission_classes = [AllowAny]
 
-class TenantConditionTreatmentView(APIView):
-    permission_classes = [AllowAny]
+#     # @with_tenant_context
+#     @atomic_transaction
+#     def get(self, request, tenant_schema_name):
+#         conditions = Condition.objects.all()
+#         treatments = Treatment.objects.all()
 
-    # @with_tenant_context
-    @atomic_transaction
-    def get(self, request, tenant_schema_name):
-        conditions = Condition.objects.all()
-        treatments = Treatment.objects.all()
+#         # Serialize the data
+#         condition_serializer = ConditionSerializer(conditions, many=True)
+#         treatment_serializer = TreatmentSerializer(treatments, many=True)
 
-        # Serialize the data
-        condition_serializer = ConditionSerializer(conditions, many=True)
-        treatment_serializer = TreatmentSerializer(treatments, many=True)
+#         return Response(
+#             {
+#                 "conditions": condition_serializer.data,
+#                 "treatments": treatment_serializer.data,
+#             }
+#         )
 
-        return Response(
-            {
-                "conditions": condition_serializer.data,
-                "treatments": treatment_serializer.data,
-            }
-        )
+#     # @with_tenant_context
+#     @atomic_transaction
+#     def post(self, request, tenant_schema_name):
+#         # Deserialize and create Condition
+#         condition_serializer = ConditionSerializer(
+#             data={"name": request.data.get("condition")}
+#         )
+#         if condition_serializer.is_valid():
+#             condition_serializer.save()
+#         else:
+#             return BaseResponse(data=condition_serializer.errors, status=400)
 
-    # @with_tenant_context
-    @atomic_transaction
-    def post(self, request, tenant_schema_name):
-        # Deserialize and create Condition
-        condition_serializer = ConditionSerializer(
-            data={"name": request.data.get("condition")}
-        )
-        if condition_serializer.is_valid():
-            condition_serializer.save()
-        else:
-            return BaseResponse(data=condition_serializer.errors, status=400)
+#         # Deserialize and create Treatment
+#         treatment_serializer = TreatmentSerializer(
+#             data={"name": request.data.get("treatment")}
+#         )
+#         if treatment_serializer.is_valid():
+#             treatment_serializer.save()
+#         else:
+#             return BaseResponse(data=treatment_serializer.errors, status=400)
 
-        # Deserialize and create Treatment
-        treatment_serializer = TreatmentSerializer(
-            data={"name": request.data.get("treatment")}
-        )
-        if treatment_serializer.is_valid():
-            treatment_serializer.save()
-        else:
-            return BaseResponse(data=treatment_serializer.errors, status=400)
-
-        return BaseResponse(
-            data={
-                "condition": condition_serializer.data,
-                "treatment": treatment_serializer.data,
-            },
-            status=201,
-        )
+#         return BaseResponse(
+#             data={
+#                 "condition": condition_serializer.data,
+#                 "treatment": treatment_serializer.data,
+#             },
+#             status=201,
+#         )
 
 
-class PatientConditionViewSet(viewsets.ModelViewSet):
-    queryset = PatientCondition.objects.all()
-    serializer_class = PatientConditionSerializer
+# class PatientConditionViewSet(viewsets.ModelViewSet):
+#     queryset = PatientCondition.objects.all()
+#     serializer_class = PatientConditionSerializer
 
 
 # class PatientTreatmentViewSet(viewsets.ModelViewSet):
@@ -253,11 +246,12 @@ class TreatmentMaterialUsedViewset(viewsets.ModelViewSet):
 #             status=200,
 #         )
 
+
 class CompanyTreatmentProceduresViewset(viewsets.ModelViewSet):
     queryset = CompanyTreatmentProcedures.objects.all()
     serializer_class = CompanyTreatmentProceduresSerializer
     permission_classes = [AllowAny]
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.factory = TreatmentProcedureFactory()
@@ -268,9 +262,7 @@ class CompanyTreatmentProceduresViewset(viewsets.ModelViewSet):
         # Delegate creation to the factory
         company_treatment_procedure = self.factory.create(serializer.validated_data)
         response_serializer = self.get_serializer(company_treatment_procedure)
-        return BaseResponse(
-            data=response_serializer.data,
-            status=201)
+        return BaseResponse(data=response_serializer.data, status=201)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -278,11 +270,14 @@ class CompanyTreatmentProceduresViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         # Delegate update to the factory
-        company_treatment_procedure = self.factory.update(instance, serializer.validated_data)
+        company_treatment_procedure = self.factory.update(
+            instance, serializer.validated_data
+        )
         response_serializer = self.get_serializer(company_treatment_procedure)
-        return BaseResponse(
-            data=response_serializer.data,
-            status=200)
+        return BaseResponse(data=response_serializer.data, status=200)
     
-        
-        
+
+class CompanyDiagnosticProceduresViewset(viewsets.ModelViewSet):
+    queryset = CompanyDiagnosticProcedures.objects.all()
+    serializer_class = CompanyDiagnosticProceduresSerializer
+    permission_classes = [AllowAny]

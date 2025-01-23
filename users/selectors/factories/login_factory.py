@@ -1,3 +1,4 @@
+from client.models import ClinicProfile
 from dental_app.utils.exceptions import AuthenticationError
 from users.selectors.authentication_service import AuthenticationService
 from users.selectors.token_service import JWTTokenService
@@ -26,4 +27,12 @@ class LoginFactory:
             )
         # Generate tokens for the authenticated user
         tokens = self.token_service_factory.generate_tokens(user)
+        if not user.is_superuser:
+            clinic_profiles = ClinicProfile.objects.select_related(
+                "clinic",
+                "user" 
+                ).filter(user__user__email=user.email)
+            tokens['client_schema_name'] = [{
+                'schema_name': clinic_profile.clinic.schema_name,
+                'clinic_id': clinic_profile.clinic.id} for clinic_profile in clinic_profiles]
         return tokens

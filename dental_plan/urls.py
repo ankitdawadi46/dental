@@ -1,9 +1,7 @@
-from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from dental_plan.views import (
     CompanyTreatmentProceduresViewset,
-    TenantConditionTreatmentView,
     TreatmentMaterialUsedViewset,
 )
 
@@ -29,13 +27,16 @@ routers.register(
     TreatmentMaterialUsedViewset,
     basename="treatment_material_used",
 )
+# routers.register(
+#     r"company-diagnostic-procedure", 
+# )
 
 urlpatterns = [
-    path(
-        "plan/<str:tenant_schema_name>/",
-        TenantConditionTreatmentView.as_view(),
-        name="dental-plan",
-    ),
+    # path(
+    #     "plan/<str:tenant_schema_name>/",
+    #     TenantConditionTreatmentView.as_view(),
+    #     name="dental-plan",
+    # ),
 ]
 
 urlpatterns += routers.urls

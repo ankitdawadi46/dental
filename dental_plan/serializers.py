@@ -3,29 +3,26 @@ from rest_framework import serializers
 from dental_plan.models import (
     CompanyTreamentProcedureSession,
     CompanyTreatmentProcedures,
-    Condition,
-    PatientCondition,
-    Treatment,
     TreatmentMaterialUsed,
+    CompanyDiagnosticProcedures
 )
 
-
-class ConditionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Condition
-        fields = ["id", "name"]
-
-
-class TreatmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Treatment
-        fields = ["id", "name"]
+# class ConditionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Condition
+#         fields = ["id", "name"]
 
 
-class PatientConditionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PatientCondition
-        fields = "__all__"
+# class TreatmentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Treatment
+#         fields = ["id", "name"]
+
+
+# class PatientConditionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = PatientCondition
+#         fields = "__all__"
 
 
 # class PatientTreatmentSerializer(serializers.ModelSerializer):
@@ -34,21 +31,21 @@ class PatientConditionSerializer(serializers.ModelSerializer):
 #         fields = "__all__"
 
 
-class PatientConditionNestedSerializer(serializers.ModelSerializer):
-    condition = ConditionSerializer()
-    treatment = TreatmentSerializer()
+# class PatientConditionNestedSerializer(serializers.ModelSerializer):
+#     condition = ConditionSerializer()
+#     treatment = TreatmentSerializer()
 
-    class Meta:
-        model = PatientCondition
-        fields = [
-            "id",
-            "name",
-            "description",
-            "condition",
-            "treatment",
-            "severity",
-            "d3_image",
-        ]
+#     class Meta:
+#         model = PatientCondition
+#         fields = [
+#             "id",
+#             "name",
+#             "description",
+#             "condition",
+#             "treatment",
+#             "severity",
+#             "d3_image",
+#         ]
 
 
 # class PatientTreatmentNestedSerializer(serializers.ModelSerializer):
@@ -101,16 +98,23 @@ class CompanyTreatmentProceduresSerializer(serializers.ModelSerializer):
         many=True, required=True
     )
     treatment_material_used = TreatmentMaterialsUsedSerializer(many=True, required=True)
+
     class Meta:
         model = CompanyTreatmentProcedures
         fields = [
-            'id',
-            'service_type_id',
-            'procedure_id',
-            'procedure_name',
-            'service_type_name',
-            'price',
-            'company_treatment_procedure_sessions',
-            'treatment_material_used',
+            "id",
+            "service_type_id",
+            "procedure_id",
+            "procedure_name",
+            "service_type_name",
+            "price",
+            "company_treatment_procedure_sessions",
+            "treatment_material_used",
         ]
         
+
+class CompanyDiagnosticProceduresSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CompanyDiagnosticProcedures
+        fields = "__all__"

@@ -1,42 +1,45 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from client.models import AuditFields
+from client.models import AuditFields, CustomUser
 from dental_structure.models import (
+    DentalDiagnosisProcedures,
+    DentalDiagnosisTypes,
+    DentalStructure,
     DentalTreatmentProcedures,
     DentalTreatmentTypes,
 )
 from stock.models import Stock
 
 
-class Condition(AuditFields):
-    name = models.CharField(max_length=255)
-    condition_detail = models.TextField()
+# class PatientCondition(AuditFields):
+#     name = models.CharField(max_length=255)
+#     description = models.TextField(null=True, blank=True)
+#     condition = models.ForeignKey(
+#         Condition,
+#         on_delete=models.CASCADE,
+#         null=True,
+#         blank=True,
+#         related_name="patient_conditions",
+#     )
+#     severity = models.CharField(
+#         max_length=100,
+#         choices=[("Mild", "Mild"), ("Moderate", "Moderate"), ("Severe", "Severe")],
+#     )
+#     d3_image = models.JSONField(null=True, blank=True)
 
+#     def __str__(self):
+#         return self.name
 
-class Treatment(AuditFields):
-    name = models.CharField(max_length=255)
-    treatment_detail = models.TextField()
-
-
-class PatientCondition(AuditFields):
-    name = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-    condition = models.ForeignKey(
-        Condition,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="patient_conditions",
+class CompanyDiagnosticProcedures(AuditFields):
+    service_type_id = models.ForeignKey(
+        DentalDiagnosisTypes, on_delete=models.CASCADE, null=True, blank=True
     )
-    severity = models.CharField(
-        max_length=100,
-        choices=[("Mild", "Mild"), ("Moderate", "Moderate"), ("Severe", "Severe")],
+    procedure_id = models.ForeignKey(
+        DentalDiagnosisProcedures, on_delete=models.CASCADE, null=True, blank=True
     )
-    d3_image = models.JSONField(null=True, blank=True)
-
-    def __str__(self):
-        return self.name
+    procedure_name = models.CharField(null=True, blank=True, max_length=255)
+    service_type_name = models.CharField(null=True, blank=True, max_length=255)
 
 
 class CompanyTreatmentProcedures(AuditFields):
@@ -53,7 +56,11 @@ class CompanyTreatmentProcedures(AuditFields):
 
 class CompanyTreamentProcedureSession(AuditFields):
     company_treatment_procedures = models.ForeignKey(
-        CompanyTreatmentProcedures, on_delete=models.CASCADE, null=True, blank=True,  related_name='company_treatment_procedure_sessions'
+        CompanyTreatmentProcedures,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="company_treatment_procedure_sessions",
     )
     session_name = models.CharField(null=True, blank=True, max_length=255)
     session_duration_hour = models.IntegerField(null=True, blank=True)
@@ -62,12 +69,56 @@ class CompanyTreamentProcedureSession(AuditFields):
 
 class TreatmentMaterialUsed(AuditFields):
     patient_treatment = models.ForeignKey(
-        CompanyTreatmentProcedures, on_delete=models.CASCADE, null=True, blank=True, related_name='treatment_material_used'
+        CompanyTreatmentProcedures,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="treatment_material_used",
     )
     material_used = models.ForeignKey(
         Stock, on_delete=models.CASCADE, blank=True, null=True
     )
     quantity = models.IntegerField(default=0, null=True, blank=True)
+    
+    
+class PatientDentalDiagnostics(AuditFields):
+    patient = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="dental_diagnostic_plan_custom_user"
+    )
+    dental_structure = models.ForeignKey(
+        DentalStructure,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="dental_diagnostic_plan_dental_structure",
+    )
+    dental_diagnostics = models.ForeignKey(
+        CompanyDiagnosticProcedures, on_delete=models.CASCADE, blank=True, null=True, 
+        related_name="dental_diagnostic_plan_dental_diagnostics"
+    )
+    
+
+
+class PatientDentalTreatmentPlans(AuditFields):
+    patient = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="dental_treatment_plan_custom_user"
+    )
+    dental_structure = models.ForeignKey(
+        DentalStructure,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="dental_treatment_plan_dental_structure",
+    )
+    dental_procedures = models.ForeignKey(
+        CompanyTreatmentProcedures,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="dental_treatment_patient_plan_dental_procedures",
+    )
+    is_existing = models.BooleanField(null=True, blank=True)
+    is_planned = models.BooleanField(null=True, blank=True)
 
     # def save(self, *args, **kwargs):
     #     # Check if the object is being created or updated

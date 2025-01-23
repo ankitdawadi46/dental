@@ -237,7 +237,7 @@ class Profile(AuditFields):
         ("Female", "Female"),
         ("Other", "Other"),
     )
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         null=True,

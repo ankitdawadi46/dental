@@ -2,11 +2,30 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from dental_app.utils.response import BaseResponse
-from dental_structure.models import DentalStructure, DentalTreatments
-from dental_structure.selectors.factory.dental_flattened_plan import DentalTreatmentFactory
-from dental_structure.serializers import DentalTreatmentsSerializer
+from dental_structure.models import (
+    DentalDiagnosis,
+    DentalDiagnosisProcedures,
+    DentalDiagnosisTypes,
+    DentalStructure,
+    DentalTreatmentProcedures,
+    DentalTreatments,
+    DentalTreatmentTypes,
+)
+from dental_structure.selectors.factory.dental_flattened_plan import (
+    DentalTreatmentFactory,
+)
+from dental_structure.serializers import (
+    DentalDiagnosisProceduresSerializer,
+    DentalDiagnosisSerializer,
+    DentalDiagnosisTypesSerializer,
+    DentalTreatmentProceduresSerializer,
+    DentalTreatmentsSerializer,
+    DentalTreatmentTypesSerializer,
+)
 
 
 class DentalStructureAPI(APIView):
@@ -44,3 +63,35 @@ class DentalTreatmentViewset(ModelViewSet):
         """
         flattened_data = DentalTreatmentFactory.get_flattened_dental_treatments()
         return BaseResponse(data=flattened_data, status=200)
+
+
+class DentalTreatmentTypesViewSet(ModelViewSet):
+    queryset = DentalTreatmentTypes.objects.all()
+    serializer_class = DentalTreatmentTypesSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    permission_classes = [AllowAny]
+    filterset_fields = ["service_type_name", "service_name"]
+    search_fields = ["service_type_name", "service_description"]
+    ordering_fields = ["service_type_name", "id"]
+
+
+class DentalTreatmentProceduresViewSet(ModelViewSet):
+    queryset = DentalTreatmentProcedures.objects.all()
+    serializer_class = DentalTreatmentProceduresSerializer
+
+
+class DentalDiagnosisViewSet(ModelViewSet):
+    queryset = DentalDiagnosis.objects.all()
+    serializer_class = DentalDiagnosisSerializer
+    permission_classes = [AllowAny]
+
+
+class DentalDiagnosisTypesViewSet(ModelViewSet):
+    queryset = DentalDiagnosisTypes.objects.all()
+    serializer_class = DentalDiagnosisTypesSerializer
+    permission_classes = [AllowAny]
+
+
+class DentalDiagnosisProceduresViewSet(ModelViewSet):
+    queryset = DentalDiagnosisProcedures.objects.all()
+    serializer_class = DentalDiagnosisProceduresSerializer
