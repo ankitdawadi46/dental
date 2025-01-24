@@ -19,4 +19,4 @@ jobs:
         server:  ftp.nimtoz.com
         username: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PASS }}
-        server-dir: /pythonapi.nimtoz.com
+        server-dir: /pythonapi.nimtoz.com/
