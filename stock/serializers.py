@@ -3,7 +3,7 @@ from .models import Stock, StockTransaction
 
 
 class StockSerializer(serializers.ModelSerializer):
-    sku = serializers.IntegerField(
+    sku = serializers.CharField(
         required=False,
         allow_null=True
     )

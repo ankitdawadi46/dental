@@ -9,7 +9,7 @@ class DomainSetup(ISetupDomain):
         with schema_context('public'):
             domain = Domain()
             # TODO change the domain name after domain is verified. Use evironment file
-            domain.domain = f"{client.primary_domain_name}.localhost"  # don't add your port or www here!
+            domain.domain = f"{client.primary_domain_name}.pythonapi.nimtoz.com"  # don't add your port or www here!
             domain.tenant = client
             domain.is_primary = True
             domain.save()
