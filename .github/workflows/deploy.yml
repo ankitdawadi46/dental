@@ -16,7 +16,7 @@ jobs:
     - name: 📂 Sync files via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server:  www.nimtoz.com
+        server:  ftp.nimtoz.com
         username: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PASS }}
         server-dir: /pythonapi.nimtoz.com
