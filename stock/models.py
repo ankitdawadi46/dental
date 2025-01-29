@@ -1,4 +1,5 @@
 import hashlib
+import secrets
 
 from django.db import models
 from django.utils.text import slugify
@@ -67,15 +68,12 @@ class Stock(AuditFields):
         return self.selling_price - self.cost_price
 
     def save(self, *args, **kwargs):
-        # Generate SKU if not provided
+    # Generate SKU if not provided
         if not self.sku:
-            # Generate a slugified version of the product name and a hash for uniqueness
+            # Generate a slugified version of the product name and a random hash for uniqueness
             slugified_name = slugify(self.product_name)
-            hash_suffix = hashlib.sha1(self.product_name.encode("utf-8")).hexdigest()[
-                :8
-            ]
-            self.sku = f"{slugified_name}-{hash_suffix}".upper()
-
+            random_suffix = secrets.token_hex(4)  # Generates an 8-character random string
+            self.sku = f"{slugified_name}-{random_suffix}".upper()
         super().save(*args, **kwargs)
         
 

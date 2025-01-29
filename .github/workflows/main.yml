@@ -17,6 +17,6 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server:  ftp.nimtoz.com
-        username: ${{ secrets.FTP_USER }}
-        password: ${{ secrets.FTP_PASS }}
-        server-dir: /pythonapi.nimtoz.com/
+        username: nimtoco@nimtoz.com
+        password: office@0977
+        server-dir: /home/nimtoco/pythonapi.nimtoz.com/
