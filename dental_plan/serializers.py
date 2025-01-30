@@ -1,11 +1,14 @@
 from rest_framework import serializers
 
+from client.serializers import CustomUserSerializer
 from dental_plan.models import (
     CompanyTreamentProcedureSession,
     CompanyTreatmentProcedures,
+    PatientDentalTreatmentPlans,
     TreatmentMaterialUsed,
     CompanyDiagnosticProcedures
 )
+from dental_structure.serializers import DentalStructureSerializer
 
 # class ConditionSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -118,3 +121,17 @@ class CompanyDiagnosticProceduresSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyDiagnosticProcedures
         fields = "__all__"
+        
+
+class PatientDentalTreatmentPlanSerializer(serializers.ModelSerializer):
+     
+    class Meta:
+         model = PatientDentalTreatmentPlans
+         fields = "__all__"
+         
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response['patient'] = CustomUserSerializer(instance.patient).data
+        response['dental_structure'] = DentalStructureSerializer(instance.dental_structure).data
+        response['dental_procedures'] = CompanyTreatmentProceduresSerializer(instance.dental_procedures).data
+        return response

@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from dental_plan.views import (
     CompanyTreatmentProceduresViewset,
+    PatientDentalTreatmentPlanViewset,
     TreatmentMaterialUsedViewset,
 )
 
@@ -26,6 +27,10 @@ routers.register(
     r"material-used/(?P<tenant_schema_name>[^/.]+)",
     TreatmentMaterialUsedViewset,
     basename="treatment_material_used",
+)
+routers.register(
+    r"patient-dental-treatment-plans", PatientDentalTreatmentPlanViewset,
+    basename="patient_dental_treatment_plans"
 )
 # routers.register(
 #     r"company-diagnostic-procedure", 

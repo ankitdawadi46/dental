@@ -115,7 +115,7 @@ DATABASES = {
         "NAME": config("DB_NAME", default="dental3"),
         "USER": config("DB_USER", default="postgres"),
         "PASSWORD": config("DB_PASSWORD", default="poonhill"),
-        "PORT": config("DB_PORT", default=1010, cast=int),
+        "PORT": config("DB_PORT", default=5432, cast=int),
         "HOST": config("DB_HOST", default="localhost"),
     }
 }

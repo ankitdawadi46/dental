@@ -2,14 +2,23 @@ import requests
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
 
-from dental_plan.models import TreatmentMaterialUsed
+from dental_plan.models import PatientDentalTreatmentPlans, TreatmentMaterialUsed
 from stock.models import Stock
 
-@receiver(post_delete, sender=TreatmentMaterialUsed)
-def delete_tretment_material_used(sender, instance, **kwargs):
-    stock = Stock.objects.get(id=instance.material_used.id)
-    stock.quantity_available += instance.quantity
-    stock.save()
+@receiver(post_delete, sender=PatientDentalTreatmentPlans)
+def restore_stock_on_treatment_plan_delete(sender, instance, **kwargs):
+    """
+    Restores stock when a PatientDentalTreatmentPlans instance is deleted.
+    """
+    # Fetch related treatment materials
+    treatment_materials = TreatmentMaterialUsed.objects.filter(
+        patient_treatment=instance.dental_procedures
+    ).select_related("material_used")
+
+    for material in treatment_materials:
+        if material.material_used:
+            material.material_used.quantity_available += material.quantity
+            material.material_used.save()
 
 API_ENDPOINT = "http://localhost:8888/error-api/"
 
@@ -29,43 +38,45 @@ def send_error_to_api(error_message, signal_type, instance):
     except requests.RequestException as e:
         pass
     
-    
-@receiver(pre_save, sender=TreatmentMaterialUsed)
+@receiver(pre_save, sender=PatientDentalTreatmentPlans)   
 def update_stock_on_pre_save(sender, instance, **kwargs):
-    # Check if the object is being updated (exists in the database)
+    """
+    Adjusts stock when a PatientDentalTreatmentPlans instance is updated.
+    """
     if instance.pk:
-        # Fetch the existing instance before updates
-        old_instance = TreatmentMaterialUsed.objects.get(pk=instance.pk)
+        # Fetch the existing PatientDentalTreatmentPlans object before update
+        old_instance = PatientDentalTreatmentPlans.objects.get(pk=instance.pk)
 
-        # Handle case when `material_used` is updated
-        if old_instance.material_used != instance.material_used:
-            # Revert stock for the old material
-            if old_instance.material_used:
-                old_instance.material_used.quantity_available += old_instance.quantity
-                old_instance.material_used.save()
+        # Fetch related treatment materials
+        treatment_materials = TreatmentMaterialUsed.objects.filter(
+            patient_treatment=old_instance.dental_procedures
+        ).select_related("material_used")
 
-            # Deduct stock for the new material
-            if instance.material_used:
-                instance.material_used.quantity_available -= instance.quantity
-                instance.material_used.save()
+        for old_instance_material in treatment_materials:
+            if old_instance_material.material_used:
+                # Restore stock for the old instance before the update
+                old_instance_material.material_used.quantity_available += old_instance_material.quantity
+                old_instance_material.material_used.save()
 
-        # Handle case when only `quantity_used` is updated
-        elif old_instance.quantity != instance.quantity:
-            # Adjust stock for the same material
-            if instance.material_used:
-                # Revert the old quantity
-                instance.material_used.quantity_available += old_instance.quantity
+                # Handle quantity update (deduct stock after update)
+                new_quantity = 0  # Define your new quantity logic based on the update
+                if old_instance_material.quantity != new_quantity:
+                    if old_instance_material.material_used.quantity_available >= new_quantity:
+                        old_instance_material.material_used.quantity_available -= new_quantity
+                        old_instance_material.material_used.save()
+                    else:
+                        raise ValueError("Insufficient stock for material")
 
-                # Deduct the new quantity
-                instance.material_used.quantity_available -= instance.quantity
-                instance.material_used.save()
+    else:
+        # Handle the creation scenario (similar logic for stock adjustment)
+        treatment_materials = TreatmentMaterialUsed.objects.filter(
+            patient_treatment=instance.dental_procedures
+        ).select_related("material_used")
 
-    else:  # This is for creation
-        if instance.material_used:
-            if instance.material_used.quantity_available >= instance.quantity:
-            # Deduct stock for the material used
-                instance.material_used.quantity_available -= instance.quantity
-                instance.material_used.save()
-            else:
-                raise ValueError("insufficient stock data")
-                # send_error_to_api(str(e), "pre_save", instance)
+        for material in treatment_materials:
+            if material.material_used:
+                if material.material_used.quantity_available >= material.quantity:
+                    material.material_used.quantity_available -= material.quantity
+                    material.material_used.save()
+                else:
+                    raise ValueError(f"Insufficient stock for material: {material.material_used}")

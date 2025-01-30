@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from dental_app.utils.response import BaseResponse
 from dental_plan.models import (
     CompanyTreatmentProcedures,
+    PatientDentalTreatmentPlans,
     TreatmentMaterialUsed,
     CompanyDiagnosticProcedures
 )
@@ -13,6 +14,7 @@ from dental_plan.selectors.factories.treatment_procedure_factory import (
 )
 from dental_plan.serializers import (
     CompanyTreatmentProceduresSerializer,
+    PatientDentalTreatmentPlanSerializer,
     TreatmentMaterialsUsedSerializer,
     CompanyDiagnosticProceduresSerializer
 )
@@ -281,3 +283,10 @@ class CompanyDiagnosticProceduresViewset(viewsets.ModelViewSet):
     queryset = CompanyDiagnosticProcedures.objects.all()
     serializer_class = CompanyDiagnosticProceduresSerializer
     permission_classes = [AllowAny]
+    
+
+class PatientDentalTreatmentPlanViewset(viewsets.ModelViewSet):
+    queryset = PatientDentalTreatmentPlans.objects.all()
+    serializer_class = PatientDentalTreatmentPlanSerializer
+    permission_classes = [AllowAny]
+
