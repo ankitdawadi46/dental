@@ -19,4 +19,4 @@ jobs:
         server:  ftp.nimtoz.com
         username: nimtoco@nimtoz.com
         password: office@0977
-        server-dir: /home/nimtoco/pythonapi.nimtoz.com/
+        server-dir: home/nimtoco/pythonapi.nimtoz.com/
