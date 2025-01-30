@@ -20,6 +20,7 @@ class UserService(IUserService):
         return user
     
     def update_user(self, user, user_data):
+        
         user_serializer = CustomUserSerializer(user, data=user_data, partial=True)
         if not user_serializer.is_valid():
             raise ValueError(user_serializer.errors)

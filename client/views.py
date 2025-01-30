@@ -185,11 +185,12 @@ class ClientViewSet(ModelViewSet):
         factory = UserCreationFactory()
         try:
             data = request.data
-            user = ClinicProfile.objects.select_related('user__user').filter(id=pk).first().user.user
-
+            try:
+                user = ClinicProfile.objects.select_related('user__user').filter(id=pk).first().user.user
+            except Exception as e:
+                return BaseResponse(message="Invalid id value", status=400)
             if not user:
                 return BaseResponse(message="User not found", status=404)
-
             # Validate profile type
             factory.user_service.validate_profile_type(data)
             # Update user data
@@ -199,15 +200,13 @@ class ClientViewSet(ModelViewSet):
                 "middle_name": data.get("middle_name"),
                 "last_name": data.get("last_name"),
             }
-            user = factory.user_service.get_or_create_user(user_data)
+            # user = factory.user_service.get_or_create_user(user_data)
             # Update user data
             user = factory.user_service.update_user(user, user_data)
-
             # Update profile
             profile = Profile.objects.filter(user=user).first()
             if not profile:
                 return BaseResponse(message="Profile not found", status=404)
-
             profile_data = {
                 "photo": data.get("photo"),
                 "dob": data.get("dob"),
@@ -220,11 +219,10 @@ class ClientViewSet(ModelViewSet):
                 "nhpc_no": data.get("nhpc_no"),
             }
             factory.profile_service.update_profile(profile, profile_data)
-
             # Update clinic profile if applicable
             if data.get("clinic"):
                 clinic_data = {"clinic": data.get("clinic")}
-                self.factory.clinic_profile_service.handle_clinic_profile(profile, clinic_data)
+                factory.clinic_profile_service.handle_clinic_profile(profile, clinic_data)
 
             return BaseResponse(
                 {"message": "User, profile, and clinic profile updated successfully"},
