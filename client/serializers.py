@@ -24,9 +24,10 @@ class DomainSerializer(ModelSerializer):
 
 class CustomUserSerializer(ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
+    get_initials = serializers.CharField(read_only=True)
     class Meta:
         model = CustomUser
-        fields = ["email", "first_name", "middle_name", "last_name", "password"]
+        fields = ["email", "first_name", "middle_name", "last_name", "password", "get_initials"]
 
     def create(self, validated_data):
         user_creator = UserCreator()

@@ -1,8 +1,6 @@
-# your_app/management/commands/populate_dental_structure.py
 import json
 from django.core.management.base import BaseCommand
 from dental_structure.models import DentalStructure, Root
-
 
 class Command(BaseCommand):
     help = "Populate the dental structure and roots based on predefined data"
@@ -10,9 +8,16 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         tooth_data = []
 
-        # Generate teeth for each quadrant
-        def generate_teeth(start_index, quadrant_name, x_offset, y_offset):
-            teeth = []
+        # Define numbering ranges for each quadrant
+        numbering_ranges = {
+            "Upper Right": range(11, 19),   # 11-18
+            "Upper Left": range(21, 29),    # 21-28
+            "Lower Left": range(31, 39),    # 31-38
+            "Lower Right": range(41, 49),   # 41-48
+        }
+
+        def generate_teeth(quadrant_name, x_offset, y_offset):
+            """Generates teeth with appropriate numbering, d3 points, and roots"""
             tooth_types = [
                 ("Central Incisor", 1),
                 ("Lateral Incisor", 1),
@@ -23,14 +28,20 @@ class Command(BaseCommand):
                 ("Second Molar", 3),
                 ("Third Molar", 3),
             ]
+            
+            teeth = []
+            numbering = numbering_ranges[quadrant_name]  # Get the correct numbering sequence
+            
             for i, (tooth_type, num_roots) in enumerate(tooth_types):
-                tooth_index = start_index + i
+                tooth_number = numbering[i]  # Assign correct dental numbering
                 base_x = x_offset + i * 15
-                teeth.append({
+
+                tooth_data = {
                     "name": f"{quadrant_name} {tooth_type}",
                     "tooth_type": tooth_type,
                     "quadrant": quadrant_name,
                     "num_roots": num_roots,
+                    "dental_numbering": tooth_number,  # Assign numbering
                     "d3_points": {
                         "outline": [
                             [base_x, y_offset],
@@ -45,33 +56,30 @@ class Command(BaseCommand):
                                     [base_x, y_offset + 10],
                                     [base_x + j - (num_roots - 1) / 2, y_offset + 30]
                                 ]
-                            } for j in range(num_roots)
+                            }
+                            for j in range(num_roots)
                         ]
                     }
-                })
+                }
+                teeth.append(tooth_data)
+
             return teeth
 
-        # Upper Right Quadrant (1-8)
-        tooth_data.extend(generate_teeth(1, "Upper Right", 10, 10))
+        # Generate teeth for each quadrant
+        tooth_data.extend(generate_teeth("Upper Right", 10, 10))
+        tooth_data.extend(generate_teeth("Upper Left", 110, 10))
+        tooth_data.extend(generate_teeth("Lower Left", 110, 50))
+        tooth_data.extend(generate_teeth("Lower Right", 10, 50))
 
-        # Upper Left Quadrant (9-16)
-        tooth_data.extend(generate_teeth(9, "Upper Left", 110, 10))
-
-        # Lower Right Quadrant (17-24)
-        tooth_data.extend(generate_teeth(17, "Lower Right", 10, 60))
-
-        # Lower Left Quadrant (25-32)
-        tooth_data.extend(generate_teeth(25, "Lower Left", 110, 60))
-
-        # Now, populate the database with the generated tooth data
+        # Insert data into the database
         for tooth in tooth_data:
-            # Create or get the DentalStructure object
-            dental_structure, _ = DentalStructure.objects.get_or_create(
+            dental_structure, created = DentalStructure.objects.get_or_create(
                 name=tooth["name"],
                 defaults={
                     "tooth_type": tooth["tooth_type"],
                     "quadrant": tooth["quadrant"],
                     "num_roots": tooth["num_roots"],
+                    "dental_numbering": tooth["dental_numbering"],
                     "d3_points": json.dumps(tooth["d3_points"]["outline"]),
                 },
             )
@@ -80,8 +88,9 @@ class Command(BaseCommand):
             for root in tooth["d3_points"]["roots"]:
                 root_obj, root_created = Root.objects.get_or_create(
                     name=root["root_name"],
-                    defaults={"d3_points": json.dumps(root["d3_points"])},
+                    defaults={"d3_points": json.dumps(root["d3_points"])}
                 )
                 dental_structure.roots.add(root_obj)
 
         self.stdout.write(self.style.SUCCESS("Dental structure data populated successfully!"))
+

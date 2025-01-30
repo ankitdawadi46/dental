@@ -54,6 +54,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+    @property
+    def get_initials(self):
+        return f"{self.first_name[0].upper()}{self.last_name[0].upper()}"
+        
 
 
 class SoftwareFeatures(DateTimeModel):

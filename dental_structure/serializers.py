@@ -4,6 +4,7 @@ from dental_structure.models import (
     DentalDiagnosis,
     DentalDiagnosisProcedures,
     DentalDiagnosisTypes,
+    DentalStructure,
     DentalTreatmentProcedures,
     DentalTreatments,
     DentalTreatmentTypes,
@@ -43,4 +44,11 @@ class DentalDiagnosisTypesSerializer(ModelSerializer):
 class DentalDiagnosisProceduresSerializer(ModelSerializer):
     class Meta:
         model = DentalDiagnosisProcedures
+        fields = "__all__"
+        
+
+class DentalStructureSerializer(ModelSerializer):
+    
+    class Meta:
+        model = DentalStructure
         fields = "__all__"

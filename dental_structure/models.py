@@ -16,6 +16,7 @@ class DentalStructure(models.Model):
     num_roots = models.PositiveIntegerField()
     d3_points = models.JSONField()  # Stores the outline points as JSON
     roots = models.ManyToManyField(Root)
+    dental_numbering = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.name

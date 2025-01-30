@@ -1,9 +1,10 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
 
 from dental_app.utils.response import BaseResponse
 from dental_structure.models import (
@@ -22,39 +23,26 @@ from dental_structure.serializers import (
     DentalDiagnosisProceduresSerializer,
     DentalDiagnosisSerializer,
     DentalDiagnosisTypesSerializer,
+    DentalStructureSerializer,
     DentalTreatmentProceduresSerializer,
     DentalTreatmentsSerializer,
     DentalTreatmentTypesSerializer,
 )
 
 
-class DentalStructureAPI(APIView):
+class DentalStructureViewSet(ModelViewSet):
+    queryset = DentalStructure.objects.all().order_by("dental_numbering")
+    serializer_class = DentalStructureSerializer
     permission_classes = [AllowAny]
-
-    def get(self, request):
-        data = []
-        structures = DentalStructure.objects.prefetch_related("roots").all()
-        for structure in structures:
-            data.append(
-                {
-                    "name": structure.name,
-                    "tooth_type": structure.tooth_type,
-                    "quadrant": structure.quadrant,
-                    "num_roots": structure.num_roots,
-                    "d3_points": structure.d3_points,
-                    "roots": [
-                        {"name": root.name, "d3_points": root.d3_points}
-                        for root in structure.roots.all()
-                    ],
-                }
-            )
-        return BaseResponse(data=data, status=200)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["dental_numbering"]
 
 
 class DentalTreatmentViewset(ModelViewSet):
     permission_classes = [AllowAny]
     queryset = DentalTreatments.objects.all()
     serializer_class = DentalTreatmentsSerializer
+    filter_backends = DjangoFilterBackend
 
     @action(detail=False, methods=["get"])
     def get_flattened_dental_treatment(self, request):

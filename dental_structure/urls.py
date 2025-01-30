@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from dental_structure.views import DentalDiagnosisProceduresViewSet, DentalDiagnosisTypesViewSet, DentalDiagnosisViewSet, DentalStructureAPI, DentalTreatmentProceduresViewSet, DentalTreatmentTypesViewSet, DentalTreatmentViewset
+from dental_structure.views import DentalDiagnosisProceduresViewSet, DentalDiagnosisTypesViewSet, DentalDiagnosisViewSet,  DentalStructureViewSet, DentalTreatmentProceduresViewSet, DentalTreatmentTypesViewSet, DentalTreatmentViewset
 
 app_name = 'dental_structure'
 
@@ -12,9 +12,10 @@ router.register(r"dental-treatment-procedures", DentalTreatmentProceduresViewSet
 router.register(r"dental-diagnosis", DentalDiagnosisViewSet)
 router.register(r"dental-diagnosis-types", DentalDiagnosisTypesViewSet)
 router.register(r"dental-diagnosis-procedures", DentalDiagnosisProceduresViewSet)
+router.register(r'structure', DentalStructureViewSet)
 
 urlpatterns = [
-    path('structure/', DentalStructureAPI.as_view(), name='dental-structure'),
+    # path('structure/', DentalStructureAPI.as_view(), name='dental-structure'),
 ]
 
 urlpatterns += router.urls
