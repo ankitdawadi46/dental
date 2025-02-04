@@ -1,7 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import action
+from django.db.models import Count
+from django.db.models.functions import Coalesce
+from django.contrib.postgres.aggregates import ArrayAgg
 
+from dental_app.utils.pagination import CustomPagination
 from dental_app.utils.response import BaseResponse
 from dental_plan.models import (
     CompanyTreatmentProcedures,
@@ -253,6 +258,8 @@ class CompanyTreatmentProceduresViewset(viewsets.ModelViewSet):
     queryset = CompanyTreatmentProcedures.objects.all()
     serializer_class = CompanyTreatmentProceduresSerializer
     permission_classes = [AllowAny]
+    pagination_class = CustomPagination
+    
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -289,4 +296,33 @@ class PatientDentalTreatmentPlanViewset(viewsets.ModelViewSet):
     queryset = PatientDentalTreatmentPlans.objects.all()
     serializer_class = PatientDentalTreatmentPlanSerializer
     permission_classes = [AllowAny]
+    
+    @action(detail=False, methods=["get"], url_path="grouped-treatment-plans")
+    def grouped_treatment_plans(self, request):
+        # Get query params
+        patient_id = request.query_params.get("patient_id", None)
+        is_existing = request.query_params.get("is_existing", None)
+        is_planned = request.query_params.get("is_planned", None)
+
+        # Base queryset
+        queryset = PatientDentalTreatmentPlans.objects.all()
+
+        # Apply filters if provided
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+        if is_existing is not None:
+            queryset = queryset.filter(is_existing=is_existing.lower() == "true")
+        if is_planned is not None:
+            queryset = queryset.filter(is_planned=is_planned.lower() == "true")
+
+        # Group data and aggregate dental structures
+        grouped_data = (
+            queryset
+            .values("patient_id", "dental_procedures_id", "is_existing", "is_planned")
+            .annotate(
+                dental_structures=Coalesce(ArrayAgg("dental_structure_id", distinct=True), [])
+            )
+        )
+
+        return BaseResponse(data=list(grouped_data), status=200)
 

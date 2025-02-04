@@ -17,9 +17,10 @@ class UserCreator(IUserCreator):
         is_staff: bool = False
     ) -> User:
         user, _ = User.objects.get_or_create(
-            username=email, email=email, first_name=first_name, last_name=last_name,
-            middle_name=middle_name
+            username=email, email=email
         )
+        user.first_name = first_name
+        user.last_name = last_name
         user.is_superuser = is_superuser
         user.is_staff = is_staff
         user.set_password(password)

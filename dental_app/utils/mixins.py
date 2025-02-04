@@ -1,5 +1,6 @@
 from django.db.models import Q
 
+from dental_app.utils.pagination import CustomPagination
 from dental_app.utils.response import BaseResponse
 
 class SearchMixin:
@@ -19,14 +20,23 @@ class SearchMixin:
 
 class PaginationMixin:
     """
-    Mixin to add pagination functionality to APIs.
+    Mixin to provide paginated or non-paginated responses.
     """
-    def paginate_and_serialize(self, queryset, serializer_class):
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = serializer_class(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = serializer_class(queryset, many=True)
-        return BaseResponse(
-            data=serializer.data,
-            status=200)
+
+    pagination_class = CustomPagination  # Ensure this is defined in your project
+
+    def list(self, request, *args, **kwargs):
+        """
+        Returns either paginated or unpaginated data based on the `paginated` query param.
+        """
+        paginated = request.GET.get("paginated", "true").lower() == "true"
+        queryset = self.filter_queryset(self.get_queryset())
+
+        if paginated:
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return BaseResponse(data=serializer.data)

@@ -282,15 +282,24 @@ class Profile(AuditFields):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
+    @property
     def get_age(self):
         if self.dob:
             today = date.today()
-            age = (
-                today.year
-                - self.dob.year
-                - ((today.month, today.day) < (self.dob.month, self.dob.day))
-            )
-            return str(age) + " " + " "
+            years = today.year - self.dob.year
+            months = today.month - self.dob.month
+            days = today.day - self.dob.day
+
+            # Adjust for negative month/day differences
+            if days < 0:
+                months -= 1
+                days += (date(today.year, today.month, 1) - date(today.year, today.month - 1, 1)).days  # Get last month's days
+
+            if months < 0:
+                years -= 1
+                months += 12
+
+            return years
         else:
             return None
 

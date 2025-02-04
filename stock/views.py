@@ -1,17 +1,32 @@
-from django.core.exceptions import ValidationError
-from django.db.models import F
+# from django.core.exceptions import ValidationError
+from django.db.models import F, Q
 from django.utils.timezone import now
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 
-from client.utils import atomic_transaction, with_tenant_context
+from client.utils import atomic_transaction
+from dental_app.utils.exceptions import ValidationError
+from dental_app.utils.mixins import PaginationMixin, SearchMixin
 from dental_app.utils.response import BaseResponse
 from stock.models import Stock, StockTransaction
-from stock.serializers import StockSerializer, StockTransactionSerializer
+from stock.serializers import (
+    StockSerializer,
+    StockTransactionGetSerializer,
+    StockTransactionPostSerializer,
+)
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 10  # Adjust this as needed
+    page_size_query_param = "page_size"
+    max_page_size = 100
 
 
 # Create your views here.
-class StockViewSet(viewsets.ModelViewSet):
+class StockViewSet(PaginationMixin, viewsets.ModelViewSet):
     """
     API for managing stock.
     """
@@ -19,6 +34,9 @@ class StockViewSet(viewsets.ModelViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
     permission_classes = [AllowAny]
+    pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]  # Add SearchFilter
+    search_fields = ["product_name"]
 
     def update_stock_quantity(self, stock, transaction_type, quantity):
         """
@@ -34,7 +52,9 @@ class StockViewSet(viewsets.ModelViewSet):
         elif transaction_type == "OUT":
             # Check if sufficient stock is available
             if current_quantity < quantity:
-                raise ValidationError(f"Insufficient stock for {stock.product_name}.")
+                raise ValidationError(
+                    message=f"Insufficient stock for {stock.product_name}.", code=400
+                )
             stock.quantity_available = F("quantity_available") - quantity
 
         # Update last restocked timestamp for IN transactions
@@ -57,47 +77,58 @@ class StockViewSet(viewsets.ModelViewSet):
             # stock.save()
 
     # @with_tenant_context
-    @atomic_transaction
-    def partial_update(self, request, *args, **kwargs):
-        """
-        Updates stock quantity or triggers reorder if necessary.
-        """
-        stock = self.get_object()
-        transaction_type = request.data.get("transaction_type")
-        quantity = int(request.data.get("quantity", 0))
+    # @atomic_transaction
+    # def partial_update(self, request, *args, **kwargs):
+    #     """
+    #     Updates stock quantity or triggers reorder if necessary.
+    #     """
+    #     stock = self.get_object()
+    #     transaction_type = request.data.get("transaction_type")
+    #     quantity = int(request.data.get("quantity", 0))
 
-        if not transaction_type or transaction_type not in ["IN", "OUT"]:
-            return BaseResponse(
-                data={"detail": "Invalid or missing transaction type."},
-                status=400,
-            )
+    #     if not transaction_type or transaction_type not in ["IN", "OUT"]:
+    #         return BaseResponse(
+    #             data={"detail": "Invalid or missing transaction type."},
+    #             status=400,
+    #         )
 
-        try:
-            # Update stock quantity
-            self.update_stock_quantity(stock, transaction_type, quantity)
+    #     try:
+    #         # Update stock quantity
+    #         self.update_stock_quantity(stock, transaction_type, quantity)
 
-            # Reorder stock if necessary
-            self.reorder_stock(stock)
+    #         # Reorder stock if necessary
+    #         self.reorder_stock(stock)
 
-            stock.refresh_from_db()  # Refresh from DB to get updated quantity
-            serializer = self.get_serializer(stock)
-            return BaseResponse(
-                data=serializer.data,
-                status=200,
-            )
+    #         stock.refresh_from_db()  # Refresh from DB to get updated quantity
+    #         serializer = self.get_serializer(stock)
+    #         return BaseResponse(
+    #             data=serializer.data,
+    #             status=200,
+    #         )
 
-        except ValidationError as e:
-            return BaseResponse(data={"detail": str(e)}, status=400)
+    #     except ValidationError as e:
+    #         return BaseResponse(data={"detail": str(e)}, status=400)
 
 
-class StockTransactionViewSet(viewsets.ModelViewSet):
+class StockTransactionViewSet(PaginationMixin, viewsets.ModelViewSet):
     """
     API for managing stock transactions.
     """
 
-    queryset = StockTransaction.objects.all()
-    serializer_class = StockTransactionSerializer
+    queryset = StockTransaction.objects.all().order_by("-transaction_date")
+    serializer_class = StockTransactionGetSerializer
     permission_classes = [AllowAny]
+    pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]  # Add SearchFilter
+    search_fields = ["stock__product_name"]# Use the custom pagination class
+
+    def get_serializer_class(self):
+        """
+        Return the appropriate serializer class based on the action.
+        """
+        if self.action == "create":
+            return StockTransactionPostSerializer
+        return StockTransactionGetSerializer
 
     # @with_tenant_context
     @atomic_transaction

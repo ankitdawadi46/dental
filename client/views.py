@@ -1,5 +1,4 @@
 # import subprocess
-from django.db import connection
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
@@ -10,7 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 # from dateutil.relativedelta import relativedelta
 from client.filter import ClientFilter
-from client.models import Client, ClinicProfile, CustomUser, Domain, Profile
+from client.models import Client, ClinicProfile, Domain, Profile
 from client.selectors.factories.client_creation_factory import ClientCreationFactory
 from client.selectors.factories.client_support_user import ClientSupportUserFactory
 from client.selectors.factories.dashboard_data_factory import DashboardDataFactory
@@ -18,11 +17,8 @@ from client.selectors.factories.user_creation_factory import UserCreationFactory
 from client.serializers import (
     ClientSerializer,
     ClinicProfileGetSerializer,
-    ClinicProfileSerializer,
-    CustomUserSerializer,
     DashboardSerializer,
     DomainSerializer,
-    ProfileSerializer,
 )
 from dental_app.utils.mixins import PaginationMixin, SearchMixin
 from dental_app.utils.pagination import CustomPagination
@@ -53,11 +49,10 @@ class DashboardViewSet(ModelViewSet):
         return BaseResponse(data=dashboard_data, message="Data retrieved successfully")
 
 
-class ClientViewSet(ModelViewSet):
+class ClientViewSet(PaginationMixin, ModelViewSet):
     queryset = Client.objects.all().order_by("-id")
     serializer_class = ClientSerializer
     permission_classes = [AllowAny]
-    pagination_class = CustomPagination
     filterset_class = ClientFilter
     filter_backends = [DjangoFilterBackend, SearchFilter]  # Add SearchFilter
     search_fields = ["name", "email"]  # Adjust fields as per your model
@@ -147,7 +142,9 @@ class ClientViewSet(ModelViewSet):
             clinic_data = {"clinic": data.get("clinic")}
             is_clinic_data = (
                 ClinicProfile.objects.select_related("clinic", "user")
-                .filter(clinic__id=data.get("clinic"), user__user__email=data.get("email"))
+                .filter(
+                    clinic__id=data.get("clinic"), user__user__email=data.get("email")
+                )
                 .exists()
             )
             if is_clinic_data:
@@ -156,14 +153,16 @@ class ClientViewSet(ModelViewSet):
                     data={"User already exists"},
                     status=400,
                 )
-             # Create user and profile
+            # Create user and profile
             user = factory.user_service.get_or_create_user(user_data)
             profile_data["user"] = user.id
             profile = factory.profile_service.create_profile(profile_data)
 
             # Create clinic profile if applicable
             if clinic_data["clinic"]:
-                factory.clinic_profile_service.handle_clinic_profile(profile, clinic_data)
+                factory.clinic_profile_service.handle_clinic_profile(
+                    profile, clinic_data
+                )
 
             return BaseResponse(
                 {"message": "User, profile, and clinic profile created successfully"},
@@ -174,20 +173,25 @@ class ClientViewSet(ModelViewSet):
             return BaseResponse(
                 {"message": "Invalid data", "errors": str(e)}, status=400
             )
-        
+
     @action(
-    detail=True,
-    methods=["PATCH"],
-    permission_classes=[AllowAny],
-    url_path="update-user",
-)
+        detail=True,
+        methods=["PATCH"],
+        permission_classes=[AllowAny],
+        url_path="update-user",
+    )
     def update_user(self, request: Request, pk: int):
         factory = UserCreationFactory()
         try:
             data = request.data
             try:
-                user = ClinicProfile.objects.select_related('user__user').filter(id=pk).first().user.user
-            except Exception as e:
+                user = (
+                    ClinicProfile.objects.select_related("user__user")
+                    .filter(id=pk)
+                    .first()
+                    .user.user
+                )
+            except Exception:
                 return BaseResponse(message="Invalid id value", status=400)
             if not user:
                 return BaseResponse(message="User not found", status=404)
@@ -222,7 +226,9 @@ class ClientViewSet(ModelViewSet):
             # Update clinic profile if applicable
             if data.get("clinic"):
                 clinic_data = {"clinic": data.get("clinic")}
-                factory.clinic_profile_service.handle_clinic_profile(profile, clinic_data)
+                factory.clinic_profile_service.handle_clinic_profile(
+                    profile, clinic_data
+                )
 
             return BaseResponse(
                 {"message": "User, profile, and clinic profile updated successfully"},
@@ -233,7 +239,6 @@ class ClientViewSet(ModelViewSet):
             return BaseResponse(
                 {"message": "Invalid data", "errors": str(e)}, status=400
             )
-
 
     def partial_update(self, request, *args, **kwargs):
         if request.data.get("schema_name"):

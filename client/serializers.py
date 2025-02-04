@@ -44,7 +44,6 @@ class CustomUserSerializer(ModelSerializer):
         
 
 class ProfileSerializer(ModelSerializer):
-    get_age = serializers.CharField(read_only=True)
     class Meta:
         model = Profile
         fields = [
@@ -63,6 +62,7 @@ class ProfileSerializer(ModelSerializer):
 
 class ProfileGetSerializer(ModelSerializer):
     user = CustomUserSerializer()
+    get_age = serializers.CharField(read_only=True)
     
     class Meta:
         model = Profile

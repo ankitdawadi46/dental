@@ -32,7 +32,12 @@ class LoginFactory:
                 "clinic",
                 "user" 
                 ).filter(user__user__email=user.email)
-            tokens['client_schema_name'] = [{
-                'schema_name': clinic_profile.clinic.schema_name,
-                'clinic_id': clinic_profile.clinic.id} for clinic_profile in clinic_profiles]
+            tokens['client_schema_name'] = [
+                {'id': f'{clinic_profile.clinic.schema_name}, {clinic_profile.clinic.id}, {clinic_profile.user.profile_type}',
+                 'title': f'{clinic_profile.clinic.schema_name}-{clinic_profile.user.profile_type}'} for clinic_profile in clinic_profiles
+                 ]
+            #     'schema_name': clinic_profile.clinic.schema_name,
+            #     'clinic_id': clinic_profile.clinic.id,
+            #     "profile_type": clinic_profile.user.profile_type} for clinic_profile in clinic_profiles],
+    
         return tokens

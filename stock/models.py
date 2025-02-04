@@ -1,4 +1,3 @@
-import hashlib
 import secrets
 
 from django.db import models
@@ -68,18 +67,22 @@ class Stock(AuditFields):
         return self.selling_price - self.cost_price
 
     def save(self, *args, **kwargs):
-    # Generate SKU if not provided
+        # Generate SKU if not provided
         if not self.sku:
             # Generate a slugified version of the product name and a random hash for uniqueness
             slugified_name = slugify(self.product_name)
-            random_suffix = secrets.token_hex(4)  # Generates an 8-character random string
+            random_suffix = secrets.token_hex(
+                4
+            )  # Generates an 8-character random string
             self.sku = f"{slugified_name}-{random_suffix}".upper()
         super().save(*args, **kwargs)
-        
+
 
 class StockTransaction(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    transaction_type = models.CharField(max_length=10, choices=[('IN', 'Stock In'), ('OUT', 'Stock Out')])
+    transaction_type = models.CharField(
+        max_length=10, choices=[("IN", "Stock In"), ("OUT", "Stock Out")]
+    )
     quantity = models.PositiveIntegerField()
     transaction_date = models.DateTimeField(auto_now_add=True)
-    reference = models.CharField(max_length=255, blank=True, null=True) 
+    reference = models.CharField(max_length=255, blank=True, null=True)

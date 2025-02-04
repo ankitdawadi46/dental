@@ -15,24 +15,28 @@ class StockSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class StockTransactionSerializer(serializers.ModelSerializer):
-    """
-    Serializer for StockTransaction model with nullable fields.
-    """
-    stock = serializers.PrimaryKeyRelatedField(
-        queryset=Stock.objects.all(),
-        required=False,
-        allow_null=True
-    )
-    transaction_type = serializers.CharField(
-        required=False,
-        allow_null=True
-    )
-    quantity = serializers.IntegerField(
-        required=False,
-        allow_null=True
-    )
+class StockTransactionGetSerializer(serializers.ModelSerializer):
+    # stock = StockSerializer(required=False, allow_null=True)
 
     class Meta:
         model = StockTransaction
         fields = '__all__'
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if isinstance(instance.stock, Stock):
+            response['stock'] = StockSerializer(instance.stock).data
+        else:
+            response['stock'] = None  # or handle the case appropriately
+        return response
+    
+
+class StockTransactionPostSerializer(serializers.ModelSerializer):
+    # stock = StockSerializer(required=False, allow_null=True)
+
+    class Meta:
+        model = StockTransaction
+        fields = '__all__'
+
+        
+    

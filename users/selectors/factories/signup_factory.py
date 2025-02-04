@@ -15,18 +15,21 @@ class SignUpFactory:
             user = user_service.create_user(
                 email=self.serializer.validated_data["email"],
                 password=self.serializer.validated_data["password"],
-            ) # Use the correct tenant schema name
-                # Create profile using the ProfileService
+                first_name=self.serializer.validated_data["first_name"],
+                last_name=self.serializer.validated_data['last_name']
+            )
+            # Use the correct tenant schema name
+            # Create profile using the ProfileService
             profile_service = ProfileCreator()
-            profile = profile_service.create_profile(user=user)
-            
+            profile = profile_service.create_profile(
+                user=user, profile_type=self.serializer.validated_data["profile_type"]
+            )
+
             clinic_profile_creator = ClinicProfileCreator(
                 clinic_name=self.serializer.validated_data["tenant_schema_name"],
-                user=profile
-                )
+                user=profile,
+            )
             clinic_profile_creator.create_profile_client()
-            
-
             return BaseResponse(
                 data={"message": "User created successfully."},
                 status=201,
