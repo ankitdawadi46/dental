@@ -1,13 +1,15 @@
+import random
 from django.contrib.auth.hashers import make_password
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from client.models import CustomUser, Profile
+from client.models import OTP, CustomUser, Profile
 from dental_app.utils.exceptions import AuthenticationError
 from dental_app.utils.response import BaseResponse
 from users.selectors.factories.login_factory import LoginFactory
+from users.selectors.factories.otp_email_factory import OTPEmailFactory
 from users.selectors.factories.password_factory import DefaultPasswordFactory
 from users.selectors.factories.signup_factory import SignUpFactory
 from users.selectors.forget_password_service import ForgotPasswordService
@@ -17,6 +19,7 @@ from users.serializers import (
     ResetPasswordSerializer,
     SignupSerializer,
 )
+from utils.generate_otp import generate_otp
 
 
 class SignupViewSet(viewsets.ViewSet):
@@ -51,7 +54,10 @@ class SignupViewSet(viewsets.ViewSet):
         try:
             # Switch to the correct tenant schema
             # Create user
+            otp = str(random.randint(100000, 999999))
             user = CustomUser.objects.create(
+                is_verified=False,
+                otp=otp,
                 email=email,
                 password=make_password(password),  # Hash the password
             )
@@ -108,7 +114,59 @@ class UserViewSet(viewsets.ViewSet):
             return signup_factory
         else:
             return BaseResponse(data={"errors": serializer.errors}, status=400)
+        
+    @action(detail=False, methods=["post"])
+    def verify_otp(self, request, *args, **kwargs):
+        """
+        Handles the POST request to verify OTP.
+        """
+        email = request.data.get("email")
+        otp = request.data.get("otp")
 
+        try:
+            # Get user by email
+            user = CustomUser.objects.get(email=email)
+            otp_instance = OTP.objects.get(user=user, otp=otp, is_used=False, purpose="SignUp")
+
+            # Check if OTP is expired
+            if otp_instance.is_expired():
+                return BaseResponse(
+                    data={"error": "OTP has expired"},
+                    status=400)
+            user.is_verified = True
+            user.save()
+            otp_instance.is_used = True
+            otp_instance.save()
+            # OTP is valid and not expired
+            return BaseResponse(
+                data={"message": "OTP verified successfully"}, 
+                status=200)
+
+        except OTP.DoesNotExist:
+            return BaseResponse(
+                data={"error": "Invalid OTP"}, status=400)
+        except CustomUser.DoesNotExist:
+            return BaseResponse(
+                data={"error": "User not found"}, status=404)
+        
+    @action(detail=False, methods=['POST'])
+    def resent_otp(self, request):
+        email = request.data.get("email")
+        purpose = request.data.get("purpose")
+        try:
+            user = CustomUser.objects.get(email=email)
+            otp_value = generate_otp(user, purpose)
+            otp_email_factory = OTPEmailFactory()
+            email_thread = otp_email_factory.create_email_thread_verification(user.email, otp_value)
+            email_thread.start()
+            return BaseResponse(
+                data={"message": "OTP resend to your email."},
+                status=200,
+            )
+            
+        except CustomUser.DoesNotExist:
+            return BaseResponse(data="USer not found!!!")
+            
     @action(detail=False, methods=["post"])
     def forgot_password(self, request):
         """
@@ -122,9 +180,9 @@ class UserViewSet(viewsets.ViewSet):
             factory = DefaultPasswordFactory()
             forgot_password_service = factory.create_forgot_password_service()
 
-            if forgot_password_service.send_reset_email(email):
+            if forgot_password_service.send_otp_email(email):
                 return Response(
-                    {"message": "Password reset email sent successfully."},
+                    {"message": "Password reset otp sent successfully."},
                     status=status.HTTP_200_OK,
                 )
             else:
@@ -137,9 +195,9 @@ class UserViewSet(viewsets.ViewSet):
     @action(
         detail=False,
         methods=["POST"],
-        url_path="reset-password/(?P<uidb64>[a-zA-Z0-9_-]+)/(?P<token>[\w-]+)",
+        url_path="reset-password",
     )
-    def reset_password(self, request, uidb64, token):
+    def reset_password(self, request):
         """
         Handles the POST request to reset the password.
         """
@@ -147,22 +205,40 @@ class UserViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             new_password = serializer.validated_data["new_password"]
             confirm_password = serializer.validated_data["confirm_password"]
+            otp = serializer.validated_data['otp']
+            email = serializer.validated_data['email']
 
             # Create the factory instance and get the service
-            factory = DefaultPasswordFactory()
-            reset_password_service = factory.create_reset_password_service()
+            try:
+                otp = OTP.objects.get(otp=otp, purpose="ForgotPassword", user__email=email, is_used=False)
+                if otp.is_expired():
+                    return BaseResponse(
+                        data="OTP is expired",
+                        status=400
+                    )
+                    
+                factory = DefaultPasswordFactory()
+                reset_password_service = factory.create_reset_password_service()
 
-            if reset_password_service.reset_password(
-                uidb64, token, new_password, confirm_password
-            ):
-                return Response(
-                    {"message": "Password reset successfully."},
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                return Response(
-                    {"error": "Invalid token or passwords don't match."},
-                    status=status.HTTP_400_BAD_REQUEST,
+                if reset_password_service.reset_password(
+                    email, otp, new_password, confirm_password
+                ):
+                    otp.is_used = True
+                    otp.save()
+                    return BaseResponse(
+                        data={"Password reset successfully."},
+                        status=200,
+                    )
+
+                else:
+                    return BaseResponse(
+                        data={"Invalid token or passwords don't match."},
+                        status=400
+                    )
+            except (OTP.DoesNotExist, ValueError):
+                return BaseResponse(
+                    data="Invalid OTP or email address",
+                    status=400
                 )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

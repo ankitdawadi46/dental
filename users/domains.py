@@ -74,7 +74,7 @@ class IForgotPasswordService(ABC):
     """
 
     @abstractmethod
-    def send_reset_email(self, email: str):
+    def send_otp_email(self, email: str):
         pass
     
 
@@ -85,4 +85,14 @@ class IResetPasswordService(ABC):
 
     @abstractmethod
     def reset_password(self, uidb64: str, token: str, new_password: str, confirm_password: str):
+        pass
+
+
+class IEmailFactory(ABC):
+    @abstractmethod
+    def create_email_thread_verification(self, email, otp):
+        pass
+    
+    @abstractmethod
+    def create_email_thread_forget_password(self, email, otp):
         pass

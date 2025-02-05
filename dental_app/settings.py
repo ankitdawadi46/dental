@@ -212,6 +212,19 @@ AUTH_USER_MODEL = "client.CustomUser"
 FRONTEND_URL = "localhost:8888"
 
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# SMTP Server settings
+EMAIL_PORT = 465  # 465 for SSL, 587 for TLS
+EMAIL_HOST = 'mail.thinkfortech.com'  # Use the SMTP host provided by your cPanel
+EMAIL_USE_SSL = True  # Use SSL for secure connection
+EMAIL_USE_TLS = False  # Set to False if using SSL, or True for TLS
+EMAIL_HOST_USER = 'anupgt@thinkfortech.com'  # Your full email address
+EMAIL_HOST_PASSWORD = 'Office@0977'  # The password for your email account
+
+# Default from email
+DEFAULT_FROM_EMAIL = 'anupgt@thinkfortech.com' 
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=1),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=30),
