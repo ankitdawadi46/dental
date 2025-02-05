@@ -56,6 +56,8 @@ class ForgotPasswordSerializer(serializers.Serializer):
 class ResetPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+    otp = serializers.CharField(write_only=True)
+    email = serializers.CharField(write_only=True)
 
 
 class LogoutSerializer(serializers.Serializer):

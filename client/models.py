@@ -49,6 +49,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=150, blank=True, null=True, unique=False)
     middle_name = models.CharField(max_length=150, blank=True, null=True, unique=False)
     last_name = models.CharField(max_length=150, blank=True, null=True, unique=False)
+    is_verified = models.BooleanField(null=False, blank=False, default=False)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []  # No additional required fields
 
@@ -58,6 +59,19 @@ class CustomUser(AbstractUser):
     @property
     def get_initials(self):
         return f"{self.first_name[0].upper()}{self.last_name[0].upper()}"
+    
+    
+class OTP(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # ForeignKey to CustomUser
+    otp = models.CharField(max_length=6)  # OTP value, adjust length as needed
+    created_at = models.DateTimeField(default=timezone.now)  # Timestamp of OTP creation
+    purpose = models.CharField(max_length=20, default="signup")
+    is_used = models.BooleanField(null=False, blank=False, default=False)
+    
+    def is_expired(self):
+        """Check if OTP is expired (older than 2 minutes)."""
+        expiration_time = timezone.now() - timezone.timedelta(minutes=2)
+        return self.created_at < expiration_time
         
 
 
